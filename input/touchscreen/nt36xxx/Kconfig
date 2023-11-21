@@ -1,11 +1,22 @@
-# SPDX-License-Identifier: GPL-2.0-only
 #
 # Novatek NT36xxx touchscreen driver configuration
 #
 config TOUCHSCREEN_NT36XXX_MI845
 	bool "Novatek NT36xxx"
+	default y
 	help
 	  Say Y here if you have a Novatek NT36xxx touchscreen connected
 	  to your system.
 
 	  If unsure, say N.
+
+config TOUCHSCREEN_NT36XXX_MPCTRL_MI845
+	bool "Novatek NT36xxx MPCTRL"
+	depends on TOUCHSCREEN_NT36XXX_MI845
+	default n
+	help
+	  Say Y here to enable NT36xxx MPCTRL, this option intended for
+	  Manufacturer Testing and grabbing RawTouch and checking the
+	  calibration CSV in Pre-Production devices.
+
+	  If unsure, say N. 
