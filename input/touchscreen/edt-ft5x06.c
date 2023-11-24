@@ -32,6 +32,11 @@
 
 #include <asm/unaligned.h>
 
+#ifdef CONFIG_DRM_PANEL
+#include <drm/drm_panel.h>
+static struct drm_panel *active_panel;
+#endif
+
 #define WORK_REGISTER_THRESHOLD		0x00
 #define WORK_REGISTER_REPORT_RATE	0x08
 #define WORK_REGISTER_GAIN		0x30
@@ -1137,6 +1142,74 @@ static void edt_ft5x06_disable_regulators(void *arg)
 	regulator_disable(data->iovcc);
 }
 
+#if defined(CONFIG_DRM_PANEL)
+static int ts_check_dt(struct device_node *np)
+{
+	int i;
+	int count;
+	struct device_node *node;
+	struct drm_panel *panel;
+
+	count = of_count_phandle_with_args(np, "panel", NULL);
+	if (count <= 0)
+		return 0;
+
+	for (i = 0; i < count; i++) {
+		node = of_parse_phandle(np, "panel", i);
+		panel = of_drm_find_panel(node);
+		of_node_put(node);
+		if (!IS_ERR(panel)) {
+			active_panel = panel;
+			return 0;
+		}
+	}
+
+	return -ENODEV;
+}
+
+static int ts_check_default_tp(struct device_node *dt, const char *prop)
+{
+	const char **active_tp = NULL;
+	int count, tmp, score = 0;
+	const char *active;
+	int ret, i;
+
+	count = of_property_count_strings(dt->parent, prop);
+	if (count <= 0 || count > 3)
+		return -ENODEV;
+
+	active_tp = kcalloc(count, sizeof(char *),  GFP_KERNEL);
+	if (!active_tp) {
+		return -ENOMEM;
+	}
+
+	ret = of_property_read_string_array(dt->parent, prop,
+			active_tp, count);
+	if (ret < 0) {
+		ret = -ENODEV;
+		goto out;
+	}
+
+	for (i = 0; i < count; i++) {
+		active = active_tp[i];
+		if (active != NULL) {
+			tmp = of_device_is_compatible(dt, active);
+			if (tmp > 0)
+				score++;
+		}
+	}
+
+	if (score <= 0) {
+		ret = -ENODEV;
+		goto out;
+	}
+	ret = 0;
+out:
+	kfree(active_tp);
+	return ret;
+}
+#endif
+
 static int edt_ft5x06_ts_probe(struct i2c_client *client,
 					 const struct i2c_device_id *id)
 {
@@ -1147,6 +1220,18 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 	unsigned long irq_flags;
 	int error;
 	u32 report_rate;
+
+#if defined(CONFIG_DRM_PANEL)
+	struct device_node *dp = client->dev.of_node;
+	if (ts_check_dt(dp)) {
+		if (!ts_check_default_tp(dp, "qcom,i2c-touch-active"))
+			error = -EPROBE_DEFER;
+		else
+			error = -ENODEV;
+
+		return error;
+	}
+#endif
 
 	dev_dbg(&client->dev, "probing for EDT FT5x06 I2C\n");
 
