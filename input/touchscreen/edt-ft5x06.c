@@ -35,6 +35,8 @@
 #ifdef CONFIG_DRM_PANEL
 #include <drm/drm_panel.h>
 static struct drm_panel *active_panel;
+extern void dsi_panel_doubleclick_enable(bool on);
+static int drm_notifier_callback(struct notifier_block *self, unsigned long event, void *data);
 #endif
 
 #define WORK_REGISTER_THRESHOLD		0x00
@@ -144,6 +146,9 @@ struct edt_ft5x06_ts_data {
 	enum edt_ver version;
 	unsigned int crc_errors;
 	unsigned int header_errors;
+#if defined(CONFIG_DRM_PANEL)
+	struct notifier_block notifier;
+#endif
 };
 
 struct edt_i2c_chip_data {
@@ -1435,12 +1440,25 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 		tsdata->wake_gpio ? desc_to_gpio(tsdata->wake_gpio) : -1,
 		tsdata->reset_gpio ? desc_to_gpio(tsdata->reset_gpio) : -1);
 
+	tsdata->notifier.notifier_call = drm_notifier_callback;
+	error = drm_panel_notifier_register(active_panel, &tsdata->notifier);
+	if (active_panel && error) {
+		dev_err(&client->dev, "register drm_notifier failed. ret=%d\n", error);
+		if (active_panel && drm_panel_notifier_unregister(active_panel, &tsdata->notifier))
+			dev_err(&client->dev, "Error occurred while unregistering drm_notifier.\n");
+	}
+
 	return 0;
 }
 
 static int edt_ft5x06_ts_remove(struct i2c_client *client)
 {
 	struct edt_ft5x06_ts_data *tsdata = i2c_get_clientdata(client);
+
+#if defined(CONFIG_DRM_PANEL)
+	if (active_panel && drm_panel_notifier_unregister(active_panel, &tsdata->notifier))
+		dev_err(&client->dev, "Error occurred while unregistering drm_notifier.\n");
+#endif
 
 	edt_ft5x06_ts_teardown_debugfs(tsdata);
 	return 0;
@@ -1550,6 +1568,37 @@ static int __maybe_unused edt_ft5x06_ts_resume(struct device *dev)
 
 	return ret;
 }
+
+
+#if defined(CONFIG_DRM_PANEL)
+static int drm_notifier_callback(struct notifier_block *self, unsigned long event, void *data)
+{
+	struct drm_panel_notifier *evdata = data;
+	int *blank;
+	struct edt_ft5x06_ts_data *ts =
+		container_of(self, struct edt_ft5x06_ts_data, notifier);
+
+	if (!evdata)
+		return 0;
+
+	if (evdata->data && ts) {
+		blank = evdata->data;
+		if (event == DRM_PANEL_EARLY_EVENT_BLANK) {
+			if (*blank == DRM_PANEL_BLANK_POWERDOWN) {
+				dsi_panel_doubleclick_enable(true);
+				//edt_ft5x06_ts_suspend(&ts->client->dev); FIXME
+			}
+		} else if (event == DRM_PANEL_EVENT_BLANK) {
+			if (*blank == DRM_PANEL_BLANK_UNBLANK) {
+				dsi_panel_doubleclick_enable(false);
+				//edt_ft5x06_ts_resume(&ts->client->dev); FIXME
+			}
+		}
+	}
+
+	return 0;
+}
+#endif
 
 static SIMPLE_DEV_PM_OPS(edt_ft5x06_ts_pm_ops,
 			 edt_ft5x06_ts_suspend, edt_ft5x06_ts_resume);
