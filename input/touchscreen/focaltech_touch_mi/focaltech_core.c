@@ -2079,7 +2079,7 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 	struct fts_ts_platform_data *pdata;
 	struct fts_ts_data *ts_data;
 	struct dentry *tp_debugfs;
-	const char *display_name;
+	//const char *display_name;
 
 #if defined(CONFIG_DRM_PANEL)
 	struct device_node *dp = client->dev.of_node;
@@ -2116,7 +2116,7 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 		FTS_ERROR("no ts platform data found");
 		return -EINVAL;
 	}
-	if (pdata->check_display_name) {
+	/*if (pdata->check_display_name) {
 		display_name = dsi_get_display_name();
 		if (display_name) {
 			FTS_INFO("display_name:%s\n", display_name);
@@ -2125,7 +2125,7 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 				return -EINVAL;
 			}
 		}
-	}
+	}*/
 
 	ts_data = devm_kzalloc(&client->dev, sizeof(*ts_data), GFP_KERNEL);
 	if (!ts_data) {
