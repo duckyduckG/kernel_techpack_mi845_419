@@ -47,7 +47,7 @@
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE
-#include "../xiaomi/xiaomi_touch.h"
+#include "../../drivers/input/touchscreen/xiaomi/xiaomi_touch.h"
 #endif
 
 #if NVT_TOUCH_EXT_PROC
