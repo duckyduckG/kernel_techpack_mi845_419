@@ -1907,6 +1907,7 @@ static int fts_power_supply_event(struct notifier_block *nb, unsigned long event
 *  Output:
 *  Return:
 *****************************************************************************/
+extern void dsi_panel_doubleclick_enable(bool on);
 static int fb_notifier_callback(struct notifier_block *self, unsigned long event, void *data)
 {
 	struct drm_panel_notifier *evdata = data;
@@ -1919,8 +1920,12 @@ static int fb_notifier_callback(struct notifier_block *self, unsigned long event
 
 		if (*blank == DRM_PANEL_BLANK_UNBLANK)
 			queue_work(fts_data->event_wq, &fts_data->resume_work);
+			if (fts_data->gesture_enabled)
+				dsi_panel_doubleclick_enable(true);
 		else if (*blank == DRM_PANEL_BLANK_POWERDOWN)
 			queue_work(fts_data->event_wq, &fts_data->suspend_work);
+			if (fts_data->gesture_enabled)
+				dsi_panel_doubleclick_enable(false);
 	}
 
 	return 0;

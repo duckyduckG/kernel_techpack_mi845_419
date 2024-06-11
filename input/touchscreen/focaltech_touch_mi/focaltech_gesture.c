@@ -136,7 +136,8 @@ static struct attribute_group fts_gesture_group = {
 static ssize_t double_tap_show(struct kobject *kobj,
 				struct kobj_attribute *attr, char *buf)
 {
-	return sprintf(buf, "%d\n", fts_gesture_data.mode);
+	fts_data->gesture_enabled = fts_gesture_data.mode;
+	return sprintf(buf, "%d\n", fts_data->gesture_enabled);
 }
 
 static ssize_t double_tap_store(struct kobject *kobj,
@@ -149,6 +150,7 @@ static ssize_t double_tap_store(struct kobject *kobj,
 		return -EINVAL;
 
 	fts_gesture_data.mode = !!val;
+	fts_data->gesture_enabled = fts_gesture_data.mode;
 	return count;
 }
 
@@ -217,6 +219,7 @@ void fts_gesture_enable(bool enable)
 		FTS_INFO("[GESTURE]disable gesture");
 		fts_gesture_data.mode = DISABLE;
 	}
+	fts_data->gesture_enabled = fts_gesture_data.mode;
 
 	mutex_unlock(&input_dev->mutex);
 }

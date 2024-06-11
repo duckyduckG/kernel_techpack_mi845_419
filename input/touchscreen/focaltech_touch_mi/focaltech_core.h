@@ -160,6 +160,7 @@ struct fts_ts_data {
 #if FTS_POWER_SOURCE_CUST_EN
 	bool power_disabled;
 #endif
+	int gesture_enabled;
 	/* multi-touch */
 	struct ts_event *events;
 	u8 *point_buf;
