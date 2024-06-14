@@ -36,16 +36,13 @@
 #ifdef CONFIG_DRM_PANEL
 #include <linux/notifier.h>
 #include <linux/fb.h>
-#include <drm/drm_panel.h>
+#include <drm/drm_notifier_mi.h>
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 #include <linux/earlysuspend.h>
 #define FTS_SUSPEND_LEVEL 1	/* Early-suspend level */
 #endif
 #ifdef CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE
 #include "../../drivers/input/touchscreen/xiaomi/xiaomi_touch.h"
-#endif
-#if defined(CONFIG_DRM_PANEL)
-static struct drm_panel *active_panel;
 #endif
 
 /*****************************************************************************
@@ -1910,19 +1907,19 @@ static int fts_power_supply_event(struct notifier_block *nb, unsigned long event
 extern void dsi_panel_doubleclick_enable(bool on);
 static int fb_notifier_callback(struct notifier_block *self, unsigned long event, void *data)
 {
-	struct drm_panel_notifier *evdata = data;
+	struct mi_drm_notifier *evdata = data;
 	int *blank;
 	struct fts_ts_data *fts_data = container_of(self, struct fts_ts_data, fb_notif);
 
-	if (evdata && evdata->data && event == DRM_PANEL_EVENT_BLANK && fts_data && fts_data->client) {
+	if (evdata && evdata->data && event == MI_DRM_EVENT_BLANK && fts_data && fts_data->client) {
 		blank = evdata->data;
 		flush_workqueue(fts_data->event_wq);
 
-		if (*blank == DRM_PANEL_BLANK_UNBLANK)
+		if (*blank == MI_DRM_BLANK_UNBLANK)
 			queue_work(fts_data->event_wq, &fts_data->resume_work);
 			if (fts_data->gesture_enabled)
 				dsi_panel_doubleclick_enable(true);
-		else if (*blank == DRM_PANEL_BLANK_POWERDOWN)
+		else if (*blank == MI_DRM_BLANK_POWERDOWN)
 			queue_work(fts_data->event_wq, &fts_data->suspend_work);
 			if (fts_data->gesture_enabled)
 				dsi_panel_doubleclick_enable(false);
@@ -1998,79 +1995,6 @@ static int check_is_focal_touch(struct fts_ts_data *ts_data)
 	return true;
 }
 
-#if defined(CONFIG_DRM_PANEL)
-static int ts_check_dt(struct device_node *np)
-{
-	int i;
-	int count;
-	struct device_node *node;
-	struct drm_panel *panel;
-
-	count = of_count_phandle_with_args(np, "panel", NULL);
-	if (count <= 0)
-		return 0;
-
-	for (i = 0; i < count; i++) {
-		node = of_parse_phandle(np, "panel", i);
-		panel = of_drm_find_panel(node);
-		of_node_put(node);
-		if (!IS_ERR(panel)) {
-			active_panel = panel;
-			FTS_INFO(" %s:find\n", __func__);
-			return 0;
-		}
-	}
-
-	FTS_ERROR(" %s: not find\n", __func__);
-	return -ENODEV;
-}
-
-static int ts_check_default_tp(struct device_node *dt, const char *prop)
-{
-	const char **active_tp = NULL;
-	int count, tmp, score = 0;
-	const char *active;
-	int ret, i;
-
-	count = of_property_count_strings(dt->parent, prop);
-	if (count <= 0 || count > 3)
-		return -ENODEV;
-
-	active_tp = kcalloc(count, sizeof(char *),  GFP_KERNEL);
-	if (!active_tp) {
-		FTS_ERROR("FTS alloc failed\n");
-		return -ENOMEM;
-	}
-
-	ret = of_property_read_string_array(dt->parent, prop,
-			active_tp, count);
-	if (ret < 0) {
-		FTS_ERROR("fail to read %s %d\n", prop, ret);
-		ret = -ENODEV;
-		goto out;
-	}
-
-	for (i = 0; i < count; i++) {
-		active = active_tp[i];
-		if (active != NULL) {
-			tmp = of_device_is_compatible(dt, active);
-			if (tmp > 0)
-				score++;
-		}
-	}
-
-	if (score <= 0) {
-		FTS_ERROR("not match this driver\n");
-		ret = -ENODEV;
-		goto out;
-	}
-	ret = 0;
-out:
-	kfree(active_tp);
-	return ret;
-}
-#endif
-
 /*****************************************************************************
 *  Name: fts_ts_probe
 *  Brief:
@@ -2084,19 +2008,7 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 	struct fts_ts_platform_data *pdata;
 	struct fts_ts_data *ts_data;
 	struct dentry *tp_debugfs;
-	//const char *display_name;
-
-#if defined(CONFIG_DRM_PANEL)
-	struct device_node *dp = client->dev.of_node;
-	if (ts_check_dt(dp)) {
-		if (!ts_check_default_tp(dp, "qcom,i2c-touch-active"))
-			ret = -EPROBE_DEFER;
-		else
-			ret = -ENODEV;
-
-		return ret;
-	}
-#endif
+	const char *display_name;
 
 	FTS_FUNC_ENTER();
 	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
@@ -2121,7 +2033,7 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 		FTS_ERROR("no ts platform data found");
 		return -EINVAL;
 	}
-	/*if (pdata->check_display_name) {
+	if (pdata->check_display_name) {
 		display_name = dsi_get_display_name();
 		if (display_name) {
 			FTS_INFO("display_name:%s\n", display_name);
@@ -2130,7 +2042,7 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 				return -EINVAL;
 			}
 		}
-	}*/
+	}
 
 	ts_data = devm_kzalloc(&client->dev, sizeof(*ts_data), GFP_KERNEL);
 	if (!ts_data) {
@@ -2308,10 +2220,9 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 
 #ifdef CONFIG_DRM_PANEL
 	ts_data->fb_notif.notifier_call = fb_notifier_callback;
-	if (active_panel) {
-		ret = drm_panel_notifier_register(active_panel, &ts_data->fb_notif);
-		if (ret < 0)
-			FTS_ERROR("[FB]Unable to register fb_notifier: %d", ret);
+	ret = mi_drm_register_client(&ts_data->fb_notif);
+	if (ret) {
+		FTS_ERROR("[FB]Unable to register fb_notifier: %d", ret);
 	}
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 	ts_data->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + FTS_SUSPEND_LEVEL;
@@ -2418,8 +2329,8 @@ static int fts_ts_remove(struct i2c_client *client)
 #endif
 
 #ifdef CONFIG_DRM_PANEL
-	if (active_panel)
-		drm_panel_notifier_unregister(active_panel, &ts_data->fb_notif);
+	if (mi_drm_unregister_client(&ts_data->fb_notif))
+		FTS_ERROR("Error occurred while unregistering fb_notifier.");
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 	unregister_early_suspend(&ts_data->early_suspend);
 #endif
