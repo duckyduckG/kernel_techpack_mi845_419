@@ -44,7 +44,7 @@
 #include <sound/initval.h>
 #include <sound/tlv.h>
 
-#include "tas2559_mainline.h"
+#include "tas2559.h"
 
 struct TBlock {
 	unsigned int mnType;
