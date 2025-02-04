@@ -33,10 +33,10 @@
 * Included header files
 *****************************************************************************/
 #include "focaltech_core.h"
-#ifdef CONFIG_DRM
+#ifdef CONFIG_DRM_PANEL
 #include <linux/notifier.h>
 #include <linux/fb.h>
-#include <drm/drm_notifier.h>
+#include <drm/drm_panel.h>
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 #include <linux/earlysuspend.h>
 #define FTS_SUSPEND_LEVEL 1	/* Early-suspend level */
@@ -44,6 +44,9 @@
 #include <linux/hwinfo.h>
 #ifdef CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE
 #include "../xiaomi/xiaomi_touch.h"
+#endif
+#if defined(CONFIG_DRM_PANEL)
+static struct drm_panel *active_panel;
 #endif
 
 /*****************************************************************************
@@ -1897,7 +1900,7 @@ static int fts_power_supply_event(struct notifier_block *nb, unsigned long event
 }
 #endif
 
-#ifdef CONFIG_DRM
+#ifdef CONFIG_DRM_PANEL
 /*****************************************************************************
 *  Name: fb_notifier_callback
 *  Brief:
@@ -1907,17 +1910,17 @@ static int fts_power_supply_event(struct notifier_block *nb, unsigned long event
 *****************************************************************************/
 static int fb_notifier_callback(struct notifier_block *self, unsigned long event, void *data)
 {
-	struct drm_notify_data *evdata = data;
+	struct drm_panel_notifier *evdata = data;
 	int *blank;
 	struct fts_ts_data *fts_data = container_of(self, struct fts_ts_data, fb_notif);
 
-	if (evdata && evdata->data && event == DRM_EVENT_BLANK && fts_data && fts_data->client) {
+	if (evdata && evdata->data && event == DRM_PANEL_EVENT_BLANK && fts_data && fts_data->client) {
 		blank = evdata->data;
 		flush_workqueue(fts_data->event_wq);
 
-		if (*blank == DRM_BLANK_UNBLANK)
+		if (*blank == DRM_PANEL_BLANK_UNBLANK)
 			queue_work(fts_data->event_wq, &fts_data->resume_work);
-		else if (*blank == DRM_BLANK_POWERDOWN)
+		else if (*blank == DRM_PANEL_BLANK_POWERDOWN)
 			queue_work(fts_data->event_wq, &fts_data->suspend_work);
 	}
 
@@ -2214,11 +2217,12 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 	power_supply_reg_notifier(&ts_data->power_supply_notifier);
 #endif
 
-#ifdef CONFIG_DRM
+#ifdef CONFIG_DRM_PANEL
 	ts_data->fb_notif.notifier_call = fb_notifier_callback;
-	ret = drm_register_client(&ts_data->fb_notif);
-	if (ret) {
-		FTS_ERROR("[FB]Unable to register fb_notifier: %d", ret);
+	if (active_panel) {
+		ret = drm_panel_notifier_register(active_panel, &ts_data->fb_notif);
+		if (ret < 0)
+			FTS_ERROR("[FB]Unable to register fb_notifier: %d", ret);
 	}
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 	ts_data->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + FTS_SUSPEND_LEVEL;
@@ -2324,9 +2328,9 @@ static int fts_ts_remove(struct i2c_client *client)
 	fts_esdcheck_exit(ts_data);
 #endif
 
-#ifdef CONFIG_DRM
-	if (drm_unregister_client(&ts_data->fb_notif))
-		FTS_ERROR("Error occurred while unregistering fb_notifier.");
+#ifdef CONFIG_DRM_PANEL
+	if (active_panel)
+		drm_panel_notifier_unregister(active_panel, &ts_data->fb_notif);
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 	unregister_early_suspend(&ts_data->early_suspend);
 #endif

@@ -114,7 +114,7 @@
  * Report Pressure in multitouch
  * 1:enable(default),0:disable
 */
-#define FTS_REPORT_PRESSURE_EN                  0
+#define FTS_REPORT_PRESSURE_EN                  1
 
 /*
  * Gesture function enable
@@ -126,24 +126,24 @@
  * ESD check & protection
  * default: disable
  */
-#define FTS_ESDCHECK_EN                         0
+#define FTS_ESDCHECK_EN                         1
 
 /*
  * Production test enable
  * 1: enable, 0:disable(default)
  */
-#define FTS_TEST_EN                             1
+#define FTS_TEST_EN                             0
 
 /*
  * Glove mode enable
  * 1: enable, 0:disable(default)
  */
-#define FTS_GLOVE_EN                            0
+#define FTS_GLOVE_EN                            1
 /*
  * cover enable
  * 1: enable, 0:disable(default)
  */
-#define FTS_COVER_EN                            0
+#define FTS_COVER_EN                            1
 /*
  * Charger enable
  * 1: enable, 0:disable(default)
