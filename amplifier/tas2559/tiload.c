@@ -1,7 +1,6 @@
 /*
 ** =============================================================================
 ** Copyright (c) 2016  Texas Instruments Inc.
-** Copyright (C) 2019 XiaoMi, Inc.
 **
 ** This program is free software; you can redistribute it and/or modify it under
 ** the terms of the GNU General Public License as published by the Free Software
@@ -38,6 +37,9 @@
 #include <linux/slab.h>
 
 #include "tiload.h"
+
+/* enable debug prints in the driver */
+/*#define DEBUG*/
 
 static struct cdev *tiload_cdev;
 static int tiload_major; /* Dynamic allocation of Mjr No. */
@@ -156,7 +158,7 @@ static ssize_t tiload_read(struct file *filp, char __user *buf,
 		kfree(rd_data);
 		return -EINVAL;
 	}
-        kfree(rd_data);
+    kfree(rd_data);
 	return size;
 }
 
