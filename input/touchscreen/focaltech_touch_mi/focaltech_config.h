@@ -126,7 +126,7 @@
  * ESD check & protection
  * default: disable
  */
-#define FTS_ESDCHECK_EN                         1
+#define FTS_ESDCHECK_EN                         0
 
 /*
  * Production test enable
@@ -138,12 +138,12 @@
  * Glove mode enable
  * 1: enable, 0:disable(default)
  */
-#define FTS_GLOVE_EN                            1
+#define FTS_GLOVE_EN                            0
 /*
  * cover enable
  * 1: enable, 0:disable(default)
  */
-#define FTS_COVER_EN                            1
+#define FTS_COVER_EN                            0
 /*
  * Charger enable
  * 1: enable, 0:disable(default)
