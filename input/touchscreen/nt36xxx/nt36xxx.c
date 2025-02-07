@@ -79,6 +79,7 @@ static int drm_notifier_callback(struct notifier_block *self, unsigned long even
 static void nvt_ts_early_suspend(struct early_suspend *h);
 static void nvt_ts_late_resume(struct early_suspend *h);
 #endif
+extern void dsi_panel_doubleclick_enable(bool on);
 
 #define INPUT_EVENT_START			0
 #define INPUT_EVENT_SENSITIVE_MODE_OFF		0
@@ -127,7 +128,7 @@ const uint16_t gesture_key_array[] = {
 static ssize_t double_tap_show(struct kobject *kobj,
 			       struct kobj_attribute *attr, char *buf)
 {
-	return sprintf(buf, "%d\n", ts->db_wakeup);
+	return sprintf(buf, "%d\n", ts->gesture_enabled);
 }
 
 static ssize_t double_tap_store(struct kobject *kobj,
@@ -140,7 +141,7 @@ static ssize_t double_tap_store(struct kobject *kobj,
 	if (rc)
 		return -EINVAL;
 
-	ts->db_wakeup = !!val;
+	ts->gesture_enabled = !!val;
 	return count;
 }
 
@@ -698,7 +699,12 @@ void nvt_ts_wakeup_gesture_report(uint8_t gesture_id, uint8_t *data)
 			break;
 		case GESTURE_DOUBLE_CLICK:
 			NVT_LOG("Gesture : Double Click.\n");
+			if (ts->gesture_enabled & 0x01) {
 			keycode = gesture_key_array[3];
+		    } else {
+			NVT_LOG("Gesture : Double Click Not Enable.\n");
+			keycode = 0;
+			}
 			break;
 		case GESTURE_WORD_Z:
 			NVT_LOG("Gesture : Word-Z.\n");
@@ -2202,7 +2208,7 @@ static int drm_notifier_callback(struct notifier_block *self, unsigned long even
 		if (*blank == MI_DRM_BLANK_POWERDOWN) {
 			if (ts->gesture_enabled) {
 				nvt_enable_reg(ts, true);
-				/*drm_panel_reset_skip_enable(true);*/
+				dsi_panel_doubleclick_enable(true);
 				/*drm_dsi_ulps_enable(true);*/
 				/*drm_dsi_ulps_suspend_enable(true);*/
 			}
@@ -2225,7 +2231,7 @@ static int drm_notifier_callback(struct notifier_block *self, unsigned long even
 		blank = evdata->data;
 		if (*blank == MI_DRM_BLANK_UNBLANK) {
 			if (ts->gesture_enabled) {
-				/*drm_panel_reset_skip_enable(false);*/
+				dsi_panel_doubleclick_enable(false);
 				/*drm_dsi_ulps_enable(false);*/
 				/*drm_dsi_ulps_suspend_enable(false);*/
 				nvt_enable_reg(ts, false);
