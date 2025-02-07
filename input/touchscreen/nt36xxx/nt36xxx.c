@@ -42,6 +42,10 @@
 #include <linux/jiffies.h>
 #endif /* #if NVT_TOUCH_ESD_PROTECT */
 
+#if WAKEUP_GESTURE && defined(CONFIG_TOUCHSCREEN_COMMON)
+#include <linux/input/tp_common.h>
+#endif
+
 #if NVT_TOUCH_ESD_PROTECT
 static struct delayed_work nvt_esd_check_work;
 static struct workqueue_struct *nvt_esd_check_wq;
@@ -116,6 +120,33 @@ const uint16_t gesture_key_array[] = {
 	KEY_POWER,  /*GESTURE_SLIDE_DOWN*/
 	KEY_POWER,  /*GESTURE_SLIDE_LEFT*/
 	KEY_POWER,  /*GESTURE_SLIDE_RIGHT*/
+};
+#endif
+
+#if WAKEUP_GESTURE && defined(CONFIG_TOUCHSCREEN_COMMON)
+static ssize_t double_tap_show(struct kobject *kobj,
+			       struct kobj_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n", ts->db_wakeup);
+}
+
+static ssize_t double_tap_store(struct kobject *kobj,
+				struct kobj_attribute *attr, const char *buf,
+				size_t count)
+{
+	int rc, val;
+
+	rc = kstrtoint(buf, 10, &val);
+	if (rc)
+		return -EINVAL;
+
+	ts->db_wakeup = !!val;
+	return count;
+}
+
+static struct tp_common_ops double_tap_ops = {
+	.show = double_tap_show,
+	.store = double_tap_store,
 };
 #endif
 
@@ -1135,6 +1166,12 @@ static void nvt_ts_work_func(struct work_struct *work)
 	int32_t i = 0;
 	int32_t finger_cnt = 0;
 
+#if WAKEUP_GESTURE
+	if (bTouchIsAwake == 0) {
+		pm_wakeup_event(&ts->input_dev->dev, 5000);
+	}
+#endif
+
 	mutex_lock(&ts->lock);
 
 	if (ts->dev_pm_suspend) {
@@ -1743,6 +1780,10 @@ static int32_t nvt_ts_probe(struct i2c_client *client, const struct i2c_device_i
 	}
 #endif
 
+#if WAKEUP_GESTURE && defined(CONFIG_TOUCHSCREEN_COMMON)
+	tp_common_set_double_tap_ops(&double_tap_ops);
+#endif
+
 	sprintf(ts->phys, "input/ts");
 	ts->input_dev->name = NVT_TS_NAME;
 	ts->input_dev->phys = ts->phys;
@@ -1800,6 +1841,10 @@ static int32_t nvt_ts_probe(struct i2c_client *client, const struct i2c_device_i
 	device_init_wakeup(&client->dev, 1);
 	ts->dev_pm_suspend = false;
 	init_completion(&ts->dev_pm_suspend_completion);
+
+#if WAKEUP_GESTURE
+	device_init_wakeup(&ts->input_dev->dev, 1);
+#endif
 
 #if BOOT_UPDATE_FIRMWARE
 	nvt_fwu_wq = create_singlethread_workqueue("nvt_fwu_wq");
@@ -1932,6 +1977,9 @@ err_init_NVT_ts:
 	free_irq(client->irq, ts);
 #if BOOT_UPDATE_FIRMWARE
 err_create_nvt_fwu_wq_failed:
+#endif
+#if WAKEUP_GESTURE
+	device_init_wakeup(&ts->input_dev->dev, 0);
 #endif
 err_int_request_failed:
 err_input_register_device_failed:
@@ -2339,6 +2387,11 @@ static void __exit nvt_driver_exit(void)
 	if (nvt_esd_check_wq)
 		destroy_workqueue(nvt_esd_check_wq);
 #endif /* #if NVT_TOUCH_ESD_PROTECT */
+
+#if WAKEUP_GESTURE
+	device_init_wakeup(&ts->input_dev->dev, 0);
+#endif
+
 }
 
 /*late_initcall(nvt_driver_init);*/
