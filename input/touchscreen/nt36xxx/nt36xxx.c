@@ -699,12 +699,7 @@ void nvt_ts_wakeup_gesture_report(uint8_t gesture_id, uint8_t *data)
 			break;
 		case GESTURE_DOUBLE_CLICK:
 			NVT_LOG("Gesture : Double Click.\n");
-			if (ts->gesture_enabled & 0x01) {
 			keycode = gesture_key_array[3];
-		    } else {
-			NVT_LOG("Gesture : Double Click Not Enable.\n");
-			keycode = 0;
-			}
 			break;
 		case GESTURE_WORD_Z:
 			NVT_LOG("Gesture : Word-Z.\n");
@@ -1786,8 +1781,11 @@ static int32_t nvt_ts_probe(struct i2c_client *client, const struct i2c_device_i
 	}
 #endif
 
-#if WAKEUP_GESTURE && defined(CONFIG_TOUCHSCREEN_COMMON)
-	tp_common_set_double_tap_ops(&double_tap_ops);
+#ifdef CONFIG_TOUCHSCREEN_COMMON
+	ret = tp_common_set_double_tap_ops(&double_tap_ops);
+	if ( ret < 0)
+        	NVT_ERR("%s: Failed to create double_tap node err=%d\n",
+			__func__, ret);
 #endif
 
 	sprintf(ts->phys, "input/ts");
