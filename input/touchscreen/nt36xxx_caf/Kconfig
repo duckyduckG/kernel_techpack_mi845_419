@@ -1,8 +1,9 @@
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Novatek NT36xxx touchscreen driver configuration
 #
-config TOUCHSCREEN_NT36XXX_MI845
-	bool "Novatek NT36XXX"
+config TOUCHSCREEN_NT36XXX_CAF
+	bool "Novatek NT36xxx CAF"
 	help
 	  Say Y here if you have a Novatek NT36xxx touchscreen connected
 	  to your system.
