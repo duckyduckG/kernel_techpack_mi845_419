@@ -1915,14 +1915,15 @@ static int fb_notifier_callback(struct notifier_block *self, unsigned long event
 		blank = evdata->data;
 		flush_workqueue(fts_data->event_wq);
 
-		if (*blank == MI_DRM_BLANK_UNBLANK)
+		if (*blank == MI_DRM_BLANK_UNBLANK) {
 			queue_work(fts_data->event_wq, &fts_data->resume_work);
 			if (fts_data->gesture_enabled)
 				dsi_panel_doubleclick_enable(true);
-		else if (*blank == MI_DRM_BLANK_POWERDOWN)
+		} else if (*blank == MI_DRM_BLANK_POWERDOWN) {
 			queue_work(fts_data->event_wq, &fts_data->suspend_work);
 			if (fts_data->gesture_enabled)
 				dsi_panel_doubleclick_enable(false);
+		}
 	}
 
 	return 0;
