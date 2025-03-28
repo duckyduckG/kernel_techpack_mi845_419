@@ -1,7 +1,7 @@
 menu "Touchscreen"
 	depends on INPUT_TOUCHSCREEN
 
-config TOUCHSCREEN_EDT_FT5X06_MI845
+config TOUCHSCREEN_EDT_FT5X06_MAINLINE
 	tristate "EDT FocalTech FT5x06 I2C Touchscreen support"
 	depends on I2C
 	select REGMAP_I2C
