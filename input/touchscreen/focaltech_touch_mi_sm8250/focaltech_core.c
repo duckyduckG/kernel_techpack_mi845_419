@@ -397,6 +397,21 @@ static int fts_power_source_init(struct fts_ts_data *data)
 	int ret = 0;
 
 	FTS_FUNC_ENTER();
+       data->vddio = regulator_get(&data->client->dev, "vddio");
+       if (IS_ERR(data->vddio)) {
+               ret = PTR_ERR(data->vddio);
+               FTS_ERROR("get vddio regulator failed,ret=%d", ret);
+               return ret;
+       }
+
+       if (regulator_count_voltages(data->vddio) > 0) {
+               ret = regulator_set_voltage(data->vddio, FTS_I2C_VTG_MIN_UV, FTS_I2C_VTG_MAX_UV);
+               if (ret) {
+                       FTS_ERROR("vdd regulator set_vddio failed ret=%d", ret);
+                       goto err_set_vtg_vdd;
+               }
+       }
+
 	data->avdd = regulator_get(&data->client->dev, "avdd");
 	if (IS_ERR(data->avdd)) {
 		ret = PTR_ERR(data->avdd);
@@ -405,12 +420,42 @@ static int fts_power_source_init(struct fts_ts_data *data)
 	}
 	regulator_set_load(data->avdd, data->pdata->avdd_load);
 
+       data->vsp = regulator_get(&data->client->dev, "lab");
+       if (IS_ERR(data->vsp)) {
+               ret = PTR_ERR(data->vsp);
+               FTS_ERROR("ret vsp regulator failed,ret=%d", ret);
+               goto err_get_vsp;
+       }
+
+       data->vsn = regulator_get(&data->client->dev, "ibb");
+       if (IS_ERR(data->vsn)) {
+               ret = PTR_ERR(data->vsn);
+               FTS_ERROR("ret vsn regulator failed,ret=%d", ret);
+               goto err_get_vsn;
+       }
+
 	FTS_FUNC_EXIT();
 	return 0;
+err_get_vsn:
+       regulator_put(data->vsp);
+err_get_vsp:
+err_set_vtg_vdd:
+       regulator_put(data->vddio);
+
+       FTS_FUNC_EXIT();
+       return ret;
 }
 
 static int fts_power_source_release(struct fts_ts_data *data)
 {
+       if (regulator_count_voltages(data->vddio) > 0)
+               regulator_set_voltage(data->vddio, 0, FTS_I2C_VTG_MAX_UV);
+       regulator_put(data->vddio);
+
+       regulator_put(data->vsp);
+
+       regulator_put(data->vsn);
+
 	return 0;
 }
 
@@ -427,6 +472,20 @@ static int fts_power_source_ctrl(struct fts_ts_data *data, int enable)
 				FTS_ERROR("enable avdd regulator failed,ret=%d",
 					  ret);
 			}
+                       ret = regulator_enable(data->vddio);
+                       if (ret) {
+                               FTS_ERROR("enable vddio regulator failed,ret=%d", ret);
+                       }
+
+                       ret = regulator_enable(data->vsp);
+                       if (ret) {
+                               FTS_ERROR("enable vsp regulator failed,ret=%d", ret);
+                       }
+
+                       ret = regulator_enable(data->vsn);
+                       if (ret) {
+                               FTS_ERROR("enable vsn regulator failed,ret=%d", ret);
+                         }
 			data->power_disabled = false;
 		}
 	} else {
@@ -438,6 +497,20 @@ static int fts_power_source_ctrl(struct fts_ts_data *data, int enable)
 					"disable avdd regulator failed,ret=%d",
 					ret);
 			}
+                       ret = regulator_disable(data->vddio);
+                       if (ret) {
+                               FTS_ERROR("disable vddio regulator failed,ret=%d", ret);
+                       }
+
+                       ret = regulator_disable(data->vsp);
+                       if (ret) {
+                               FTS_ERROR("disable vsp regulator failed,ret=%d", ret);
+                       }
+
+                       ret = regulator_disable(data->vsn);
+                       if (ret) {
+                               FTS_ERROR("disable vsn regulator failed,ret=%d", ret);
+                        }
 			data->power_disabled = true;
 		}
 	}
