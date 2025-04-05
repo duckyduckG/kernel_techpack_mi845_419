@@ -624,8 +624,9 @@ static int fts_read_parse_touchdata(struct fts_ts_data *data)
 	data->touch_point = 0;
 
 	if (data->ic_info.is_incell) {
-		if ((data->point_num == 0x0F) && (buf[2] == 0xFF) && (buf[3] == 0xFF)
-			&& (buf[4] == 0xFF) && (buf[5] == 0xFF) && (buf[6] == 0xFF)) {
+		if ((data->point_num == 0x0F) &&  (buf[1] == 0xFF) && (buf[2] == 0xFF) &&
+		    (buf[3] == 0xFF) && (buf[4] == 0xFF) && (buf[5] == 0xFF) &&
+		    (buf[6] == 0xFF)) {
 			FTS_DEBUG("touch buff is 0xff, need recovery state");
 			fts_release_all_finger();
 			fts_tp_state_recovery(data);
