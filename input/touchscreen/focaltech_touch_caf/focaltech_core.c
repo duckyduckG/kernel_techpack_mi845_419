@@ -906,8 +906,8 @@ static int fts_power_source_ctrl(struct fts_ts_data *ts_data, int enable)
 {
 	int ret = 0;
 
-	if (IS_ERR_OR_NULL(ts_data->vdd)) {
-		FTS_ERROR("vdd is invalid");
+	if (IS_ERR_OR_NULL(ts_data->vddio)) {
+		FTS_ERROR("vddio is invalid");
 		return -EINVAL;
 	}
 
@@ -915,13 +915,26 @@ static int fts_power_source_ctrl(struct fts_ts_data *ts_data, int enable)
 	if (enable) {
 		if (ts_data->power_disabled) {
 			FTS_DEBUG("regulator enable !");
-			gpio_direction_output(ts_data->pdata->reset_gpio, 0);
+			//gpio_direction_output(ts_data->pdata->reset_gpio, 0);
 			msleep(1);
 			ret = regulator_enable(ts_data->vdd);
 			if (ret) {
 				FTS_ERROR("enable vdd regulator failed,ret=%d", ret);
 			}
+             ret = regulator_enable(ts_data->vddio);
+             if (ret) {
+             FTS_ERROR("enable vddio regulator failed,ret=%d", ret);
+             }
 
+             ret = regulator_enable(ts_data->vsp);
+             if (ret) {
+             FTS_ERROR("enable vsp regulator failed,ret=%d", ret);
+             }
+
+             ret = regulator_enable(ts_data->vsn);
+             if (ret) {
+             FTS_ERROR("enable vsn regulator failed,ret=%d", ret);
+             }
 			if (!IS_ERR_OR_NULL(ts_data->vcc_i2c)) {
 				ret = regulator_enable(ts_data->vcc_i2c);
 				if (ret) {
@@ -933,12 +946,26 @@ static int fts_power_source_ctrl(struct fts_ts_data *ts_data, int enable)
 	} else {
 		if (!ts_data->power_disabled) {
 			FTS_DEBUG("regulator disable !");
-			gpio_direction_output(ts_data->pdata->reset_gpio, 0);
+			//gpio_direction_output(ts_data->pdata->reset_gpio, 0);
 			msleep(1);
 			ret = regulator_disable(ts_data->vdd);
 			if (ret) {
 				FTS_ERROR("disable vdd regulator failed,ret=%d", ret);
 			}
+             ret = regulator_disable(ts_data->vddio);
+             if (ret) {
+             FTS_ERROR("disable vddio regulator failed,ret=%d", ret);
+             }
+
+             ret = regulator_disable(ts_data->vsp);
+             if (ret) {
+             FTS_ERROR("disable vsp regulator failed,ret=%d", ret);
+             }
+
+             ret = regulator_disable(ts_data->vsn);
+             if (ret) {
+             FTS_ERROR("disable vsn regulator failed,ret=%d", ret);
+             }
 			if (!IS_ERR_OR_NULL(ts_data->vcc_i2c)) {
 				ret = regulator_disable(ts_data->vcc_i2c);
 				if (ret) {
@@ -991,6 +1018,45 @@ static int fts_power_source_init(struct fts_ts_data *ts_data)
 			return ret;
 		}
 	}
+
+       ts_data->vddio = regulator_get(ts_data->dev, "vddio");
+       if (IS_ERR(ts_data->vddio)) {
+               ret = PTR_ERR(ts_data->vddio);
+               FTS_ERROR("get vddio regulator failed,ret=%d", ret);
+               return ret;
+       }
+
+       if (regulator_count_voltages(ts_data->vddio) > 0) {
+               ret = regulator_set_voltage(ts_data->vddio, FTS_I2C_VTG_MIN_UV,
+						FTS_I2C_VTG_MAX_UV);
+               if (ret) {
+                       FTS_ERROR("vdd regulator set_vddio failed ret=%d", ret);
+                       regulator_put(ts_data->vddio);
+			            return ret;
+               }
+       }
+
+        ts_data->avdd = regulator_get(ts_data->dev, "avdd");
+        if (IS_ERR(ts_data->avdd)) {
+                ret = PTR_ERR(ts_data->avdd);
+                FTS_ERROR("get vddio regulator failed,ret=%d", ret);
+                return ret;
+        }
+       regulator_set_load(ts_data->avdd, ts_data->pdata->avdd_load);
+
+
+       ts_data->vsp = regulator_get(ts_data->dev, "lab");
+       if (IS_ERR(ts_data->vsp)) {
+               ret = PTR_ERR(ts_data->vsp);
+               FTS_ERROR("ret vsp regulator failed,ret=%d", ret);
+       }
+
+       ts_data->vsn = regulator_get(ts_data->dev, "ibb");
+       if (IS_ERR(ts_data->vsn)) {
+               ret = PTR_ERR(ts_data->vsn);
+               FTS_ERROR("ret vsn regulator failed,ret=%d", ret);
+               regulator_put(ts_data->vsp);
+       }
 
 	ts_data->vcc_i2c = regulator_get(ts_data->dev, "vcc_i2c");
 	if (!IS_ERR_OR_NULL(ts_data->vcc_i2c)) {
