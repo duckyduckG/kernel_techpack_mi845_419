@@ -127,6 +127,7 @@ struct fts_ts_platform_data {
 	u32 x_min;
 	u32 y_min;
 	u32 max_touch_number;
+	u32 avdd_load;
 };
 
 struct ts_event {
@@ -178,6 +179,10 @@ struct fts_ts_data {
 	int key_state;
 	int touch_point;
 	int point_num;
+	struct regulator *vsp;
+	struct regulator *vsn;
+	struct regulator *vddio;
+	struct regulator *avdd;
 	struct regulator *vdd;
 	struct regulator *vcc_i2c;
 #if FTS_PINCTRL_EN
