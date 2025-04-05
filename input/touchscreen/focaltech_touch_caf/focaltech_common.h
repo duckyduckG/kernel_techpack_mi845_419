@@ -54,7 +54,10 @@
 #define FTS_CHIP_IDC            ((FTS_CHIP_TYPE & FLAGBIT(FLAG_IDC_BIT)) == FLAGBIT(FLAG_IDC_BIT))
 #define FTS_HID_SUPPORTTED      ((FTS_CHIP_TYPE & FLAGBIT(FLAG_HID_BIT)) == FLAGBIT(FLAG_HID_BIT))
 
-#define FTS_CHIP_TYPE_MAPPING {{0x81, 0x54, 0x52, 0x54, 0x52, 0x00, 0x00, 0x54, 0x5C}}
+#define FTS_CHIP_TYPE_MAPPING {\
+	{0x0D, 0x87, 0x19, 0x87, 0x19, 0x87, 0xA9, 0x87, 0xB9},\
+	{0x81, 0x54, 0x52, 0x54, 0x52, 0x00, 0x00, 0x54, 0x5c},\
+}
 
 #define FILE_NAME_LENGTH                    128
 #define ENABLE                              1
