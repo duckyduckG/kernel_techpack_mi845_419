@@ -41,7 +41,7 @@
 #define FTS_SUSPEND_LEVEL 1 /* Early-suspend level */
 #endif
 #ifdef CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE
-#include "../xiaomi/xiaomi_touch.h"
+#include "../../drivers/input/touchscreen/xiaomi/xiaomi_touch.h"
 #endif
 #include <linux/backlight.h>
 #include <linux/input/touch_common_info.h>
