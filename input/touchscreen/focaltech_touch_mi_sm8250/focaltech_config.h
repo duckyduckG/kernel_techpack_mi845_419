@@ -95,7 +95,7 @@
 /*
  * choose your ic chip type of focaltech
  */
-#define FTS_CHIP_TYPE _FT3518
+#define FTS_CHIP_TYPE _FT8719
 
 /******************* Enables *********************/
 /*********** 1 to enable, 0 to disable ***********/
@@ -128,7 +128,7 @@
  * Production test enable
  * 1: enable, 0:disable(default)
  */
-#define FTS_TEST_EN 1
+#define FTS_TEST_EN 0
 
 /*
  * Glove mode enable
@@ -163,7 +163,7 @@
  * enable it when customer need control TP power
  * default: disable
  */
-#define FTS_POWER_SOURCE_CUST_EN
+#define FTS_POWER_SOURCE_CUST_EN 1
 
 /****************************************************/
 
@@ -171,7 +171,7 @@
 /*
  * auto upgrade, please keep enable
  */
-#define FTS_AUTO_UPGRADE_EN 1
+#define FTS_AUTO_UPGRADE_EN 0
 
 /*
  * auto upgrade for lcd cfg
