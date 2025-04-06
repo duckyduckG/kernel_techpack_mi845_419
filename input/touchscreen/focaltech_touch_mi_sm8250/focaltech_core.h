@@ -128,6 +128,7 @@ struct fts_ts_platform_data {
 	bool reset_when_resume;
 	u32 lockdown_info_addr;
 	unsigned int vdd_gpio;
+	const char *project_name;
 };
 
 struct ts_event {

@@ -1851,6 +1851,12 @@ static int fts_parse_dt(struct device *dev, struct fts_ts_platform_data *pdata)
 
 	FTS_INFO("max touch number:%d, irq gpio:%d, reset gpio:%d",
 		 pdata->max_touch_number, pdata->irq_gpio, pdata->reset_gpio);
+	ret = of_property_read_string(np, "focaltech,project-name", &pdata->project_name);
+	if (!ret)
+		FTS_ERROR("Unable to get project name");
+	else {
+		FTS_INFO("project name:%s\n", pdata->project_name);
+	}
 	ret = of_property_read_u32(np, "focaltech,avdd-load", &temp_val);
 	if (ret == 0) {
 		pdata->avdd_load = temp_val;

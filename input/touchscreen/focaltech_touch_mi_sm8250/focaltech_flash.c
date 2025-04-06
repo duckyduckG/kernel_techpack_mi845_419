@@ -44,21 +44,16 @@
 *****************************************************************************/
 /* Upgrade FW/PRAMBOOT/LCD CFG */
 u8 fw_file[] = {
-#include FTS_UPGRADE_FW_FILE
+#include FTS_UPGRADE_FW_FILE_E10
 };
 
 u8 fw_file2[] = {
-#include FTS_UPGRADE_FW2_FILE
-};
-
-u8 fw_file3[] = {
-#include FTS_UPGRADE_FW3_FILE
+#include FTS_UPGRADE_FW_FILE_E5
 };
 
 struct upgrade_fw fw_list[] = {
-	{ FTS_VENDOR_ID, fw_file, sizeof(fw_file) },
-	{ FTS_VENDOR_ID2, fw_file2, sizeof(fw_file2) },
-	{ FTS_VENDOR_ID3, fw_file3, sizeof(fw_file3) },
+	{FTS_PROJECT_NAME, FTS_VENDOR_ID, fw_file, sizeof(fw_file) },
+	{FTS_PROJECT_NAME1, FTS_VENDOR_ID2, fw_file2, sizeof(fw_file2) },
 };
 
 struct upgrade_func *upgrade_func_list[] = {
@@ -1484,6 +1479,8 @@ static int fts_fwupg_get_fw_file(struct fts_ts_data *ts_data)
 {
 	struct upgrade_fw *fw = &fw_list[0];
 	struct fts_upgrade *upg = fwupgrade;
+	int i = 0;
+	int len = 0;
 
 #if (FTS_GET_VENDOR_ID_NUM > 1)
 	int ret = 0;
@@ -1509,6 +1506,27 @@ static int fts_fwupg_get_fw_file(struct fts_ts_data *ts_data)
 		return -ENODATA;
 	}
 #endif
+
+	for (i = 0; i < sizeof(fw_list)/sizeof(fw_list[0]); i++) {
+		fw = &fw_list[i];
+		len = strlen(ts_data->pdata->project_name) > strlen(fw->project_name) ? strlen(ts_data->pdata->project_name) : strlen(fw->project_name);
+#ifdef FW_UPDATE_BY_VENDOR_ID
+		if (ts_data->pdata->project_name && !strncmp(ts_data->pdata->project_name, fw->project_name, len) && vendor_id == fw->vendor_id) {
+			FTS_INFO("project id and vendor id match, get fw file successfully");
+			break;
+		}
+#else
+		if (ts_data->pdata->project_name && !strncmp(ts_data->pdata->project_name, fw->project_name, strlen(ts_data->pdata->project_name))) {
+			FTS_INFO("vendor id match, get fw file successfully");
+			break;
+		}
+#endif
+
+	}
+	if (i >= sizeof(fw_list)/sizeof(fw_list[0])) {
+		FTS_ERROR("no vendor id or project id match, don't get file");
+		return -ENODATA;
+	}
 
 	if (upg) {
 		upg->fw = fw->fw_file;

@@ -171,7 +171,7 @@
 /*
  * auto upgrade, please keep enable
  */
-#define FTS_AUTO_UPGRADE_EN 0
+#define FTS_AUTO_UPGRADE_EN 1
 
 /*
  * auto upgrade for lcd cfg
@@ -184,6 +184,8 @@
  * 1/2/3: Check vendor_id for vendor compatibility
  */
 #define FTS_GET_VENDOR_ID_NUM 0
+#define FTS_PROJECT_NAME "e10"
+#define FTS_PROJECT_NAME1 "e5"
 
 /*
  * vendor_id(s) for vendor(s) to be compatible with.
@@ -203,7 +205,8 @@
  * define your own fw_file, the sample one to be replaced is invalid
  * NOTE: if FTS_GET_VENDOR_ID_NUM > 1, it's the fw corresponding with FTS_VENDOR_ID
  */
-#define FTS_UPGRADE_FW_FILE "include/firmware/fw_ft3518_j11.i"
+#define FTS_UPGRADE_FW_FILE_E10                      "include/firmware/fw_ft8719_e10.i"
+#define FTS_UPGRADE_FW_FILE_E5                      "include/firmware/fw_ft3518_e5.i"
 
 /*
  * if FTS_GET_VENDOR_ID_NUM >= 2, fw corrsponding with FTS_VENDOR_ID2
