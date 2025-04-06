@@ -129,6 +129,7 @@ struct fts_ts_platform_data {
 	u32 lockdown_info_addr;
 	unsigned int vdd_gpio;
 	const char *project_name;
+	bool cutoff_power;
 };
 
 struct ts_event {

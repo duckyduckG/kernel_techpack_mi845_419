@@ -1869,6 +1869,7 @@ static int fts_parse_dt(struct device *dev, struct fts_ts_platform_data *pdata)
 
 	pdata->reset_when_resume =
 		of_property_read_bool(np, "focaltech,reset-when-resume");
+	pdata->cutoff_power = of_property_read_bool(np, "focaltech,cutoff-power");
 
 	FTS_FUNC_EXIT();
 	return 0;
@@ -2912,12 +2913,13 @@ sleep_mode:
 #if FTS_PINCTRL_EN
 	fts_pinctrl_select_suspend(ts_data);
 #endif
-#if defined(FTS_POWER_SOURCE_CUST_EN) && defined(CONFIG_FACTORY_BUILD)
+#if FTS_POWER_SOURCE_CUST_EN
+  if (ts_data->pdata->cutoff_power) {
 	ret = fts_power_source_ctrl(ts_data, DISABLE);
 	if (ret < 0) {
 		FTS_ERROR("power off fail, ret=%d", ret);
 	}
-#else
+       } else {
 	/* TP enter sleep mode */
 	ret = fts_palm_enable(ts_data, 0);
 	if (!ret)
@@ -2927,6 +2929,7 @@ sleep_mode:
 				FTS_REG_POWER_MODE_SLEEP_VALUE);
 	if (ret < 0)
 		FTS_ERROR("set TP to sleep mode fail, ret=%d", ret);
+		}
 #endif
 	ts_data->suspended = true;
 #ifndef CONFIG_FACTORY_BUILD
@@ -2960,7 +2963,8 @@ static int fts_ts_resume(struct device *dev)
 		return 0;
 	}
 
-#if defined(FTS_POWER_SOURCE_CUST_EN) && defined(CONFIG_FACTORY_BUILD)
+#if FTS_POWER_SOURCE_CUST_EN
+    if (ts_data->pdata->cutoff_power)
 	fts_power_source_ctrl(ts_data, ENABLE);
 #endif
 
