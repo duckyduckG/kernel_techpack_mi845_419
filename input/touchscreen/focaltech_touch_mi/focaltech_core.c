@@ -82,6 +82,8 @@ struct fts_ts_data *fts_data;
 /*****************************************************************************
 * Static function prototypes
 *****************************************************************************/
+#define EVENT_INPUT 0x1
+extern void lpm_disable_for_dev(bool on, char event_dev);
 static void fts_release_all_finger(void);
 static int fts_ts_suspend(struct device *dev);
 static int fts_ts_resume(struct device *dev);
@@ -640,6 +642,7 @@ static void fts_release_all_finger(void)
 #endif
 	input_report_key(input_dev, BTN_TOUCH, 0);
 	input_sync(input_dev);
+	lpm_disable_for_dev(false, EVENT_INPUT);
 
 	mutex_unlock(&fts_data->report_mutex);
 	FTS_FUNC_EXIT();
@@ -756,6 +759,7 @@ static int fts_input_report_b(struct fts_ts_data *data)
 		if (EVENT_NO_DOWN(data) || (!touchs)) {
 			/*FTS_DEBUG("[B]Points All Up!"); */
 			input_report_key(data->input_dev, BTN_TOUCH, 0);
+			lpm_disable_for_dev(false, EVENT_INPUT);
 		} else {
 			input_report_key(data->input_dev, BTN_TOUCH, 1);
 		}
@@ -966,6 +970,7 @@ static irqreturn_t fts_ts_interrupt(int irq, void *data)
 			}
 	}
 
+	lpm_disable_for_dev(true, EVENT_INPUT);
 	ret = fts_read_touchdata(ts_data);
 	if (ret == 0) {
 		mutex_lock(&ts_data->report_mutex);

@@ -49,6 +49,7 @@
 #ifdef CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE
 #include "../../drivers/input/touchscreen/xiaomi/xiaomi_touch.h"
 #endif
+#define TOUCH_DISABLE_LPM 1
 
 #if NVT_TOUCH_EXT_PROC
 extern int32_t nvt_extra_proc_init(void);
@@ -77,6 +78,7 @@ static int nvt_fb_notifier_callback(struct notifier_block *self, unsigned long e
 static void nvt_ts_early_suspend(struct early_suspend *h);
 static void nvt_ts_late_resume(struct early_suspend *h);
 #endif
+extern void lpm_disable_for_dev(bool on, char event_dev);
 
 #if TOUCH_KEY_NUM > 0
 const uint16_t touch_key_array[TOUCH_KEY_NUM] = {
@@ -1027,6 +1029,9 @@ static irqreturn_t nvt_ts_work_func(int irq, void *data)
 	ret = CTP_I2C_READ(ts->client, I2C_FW_Address, point_data, POINT_DATA_LEN + 1);
 	if (unlikely(ret < 0)) {
 		NVT_ERR("CTP_I2C_READ failed.(%d)\n", ret);
+		if (TOUCH_DISABLE_LPM) {
+			lpm_disable_for_dev(false, 0x1);
+		}
 		goto XFER_ERROR;
 	}
 
@@ -1038,6 +1043,9 @@ static irqreturn_t nvt_ts_work_func(int irq, void *data)
 	if (unlikely(bTouchIsAwake == 0)) {
 		input_id = (uint8_t)(point_data[1] >> 3);
 		nvt_ts_wakeup_gesture_report(input_id, point_data);
+		if (TOUCH_DISABLE_LPM) {
+			lpm_disable_for_dev(false, 0x1);
+		}
 		nvt_irq_enable(true);
 		goto XFER_ERROR;
 	}
@@ -1080,6 +1088,9 @@ static irqreturn_t nvt_ts_work_func(int irq, void *data)
 			input_mt_slot(ts->input_dev, i);
 			input_report_abs(ts->input_dev, ABS_MT_PRESSURE, 0);
 			input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, false);
+				if (TOUCH_DISABLE_LPM) {
+					lpm_disable_for_dev(false, 0x1);
+				}
 		}
 	}
 
