@@ -16,6 +16,7 @@ config TOUCHSCREEN_EDT_FT5X06_MAINLINE
 	  module will be called edt-ft5x06.
 
 source "techpack/mi845/input/touchscreen/focaltech_touch_mi/Kconfig"
+source "techpack/mi845/input/touchscreen/focaltech_touch_caf/Kconfig"
 source "techpack/mi845/input/touchscreen/nt36xxx/Kconfig"
 source "techpack/mi845/input/touchscreen/nt36xxx_los/Kconfig"
 
