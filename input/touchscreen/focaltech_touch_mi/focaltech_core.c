@@ -2003,7 +2003,6 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 	struct fts_ts_platform_data *pdata;
 	struct fts_ts_data *ts_data;
 	struct dentry *tp_debugfs;
-	//const char *display_name;
 
 	FTS_FUNC_ENTER();
 	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
@@ -2028,16 +2027,6 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 		FTS_ERROR("no ts platform data found");
 		return -EINVAL;
 	}
-	/*if (pdata->check_display_name) {
-		display_name = dsi_get_display_name();
-		if (display_name) {
-			FTS_INFO("display_name:%s\n", display_name);
-			if (strncmp(display_name, "dsi_visionox", 12)) {
-				FTS_ERROR("not the right display, do not need to do probe\n");
-				return -EINVAL;
-			}
-		}
-	}*/
 
 	ts_data = devm_kzalloc(&client->dev, sizeof(*ts_data), GFP_KERNEL);
 	if (!ts_data) {
