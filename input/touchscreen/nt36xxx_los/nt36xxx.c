@@ -27,7 +27,7 @@
 #include <linux/regulator/consumer.h>
 
 #ifdef CONFIG_DRM_PANEL
-#include <drm/drm_panel.h>
+#include <drm/drm_notifier_mi.h>
 #endif
 
 #include "nt36xxx.h"
@@ -1979,8 +1979,8 @@ static int32_t nvt_ts_probe(struct i2c_client *client, const struct i2c_device_i
 
 #if defined(CONFIG_DRM_PANEL)
 	ts->notifier.notifier_call = nvt_drm_notifier_callback;
-	ret = drm_panel_notifier_register(active_panel, &ts->notifier);
-	if (active_panel && ret) {
+	ret = mi_drm_register_client(&ts->notifier);
+	if (ret) {
 		NVT_ERR("register drm_notifier failed. ret=%d\n", ret);
 		goto err_register_drm_notif_failed;
 	}
@@ -1995,7 +1995,7 @@ static int32_t nvt_ts_probe(struct i2c_client *client, const struct i2c_device_i
 
 #if defined(CONFIG_DRM_PANEL)
 err_register_drm_notif_failed:
-	if (active_panel && drm_panel_notifier_unregister(active_panel, &ts->notifier))
+	if (mi_drm_unregister_client(&ts->notifier))
 		NVT_ERR("Error occurred while unregistering drm_notifier.\n");
 #endif
 #ifdef CONFIG_TOUCHSCREEN_NT36XXX_MP_CTRLRAM
@@ -2065,7 +2065,7 @@ static int32_t nvt_ts_remove(struct i2c_client *client)
 	NVT_LOG("Removing driver...\n");
 
 #if defined(CONFIG_DRM_PANEL)
-	if (active_panel && drm_panel_notifier_unregister(active_panel, &ts->notifier))
+	if (mi_drm_unregister_client(&ts->notifier))
 		NVT_ERR("Error occurred while unregistering drm_notifier.\n");
 #endif
 
@@ -2133,8 +2133,8 @@ static void nvt_ts_shutdown(struct i2c_client *client)
 	nvt_irq_enable(false);
 
 #if defined(CONFIG_DRM_PANEL)
-	if (active_panel)
-		drm_panel_notifier_unregister(active_panel, &ts->notifier);
+	if (mi_drm_unregister_client(&ts->notifier))
+		NVT_ERR("Error occurred while unregistering mi_drm_notifier.\n");
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_NT36XXX_MP_CTRLRAM
@@ -2322,7 +2322,7 @@ static int32_t nvt_ts_resume(struct device *dev)
 #if defined(CONFIG_DRM_PANEL)
 static int nvt_drm_notifier_callback(struct notifier_block *self, unsigned long event, void *data)
 {
-	struct drm_panel_notifier *evdata = data;
+	struct mi_drm_notifier *evdata = data;
 	int *blank;
 	struct nvt_ts_data *ts =
 		container_of(self, struct nvt_ts_data, notifier);
@@ -2332,8 +2332,8 @@ static int nvt_drm_notifier_callback(struct notifier_block *self, unsigned long 
 
 	if (evdata->data && ts) {
 		blank = evdata->data;
-		if (event == DRM_PANEL_EARLY_EVENT_BLANK) {
-			if (*blank == DRM_PANEL_BLANK_POWERDOWN) {
+		if (event == MI_DRM_EARLY_EVENT_BLANK) {
+			if (*blank == MI_DRM_BLANK_POWERDOWN) {
 				NVT_LOG("event=%lu, *blank=%d\n", event, *blank);
 #if WAKEUP_GESTURE
 				if (ts->gesture_enabled) {
@@ -2343,8 +2343,8 @@ static int nvt_drm_notifier_callback(struct notifier_block *self, unsigned long 
 #endif
 				nvt_ts_suspend(&ts->client->dev);
 			}
-		} else if (event == DRM_PANEL_EVENT_BLANK) {
-			if (*blank == DRM_PANEL_BLANK_UNBLANK) {
+		} else if (event == MI_DRM_EVENT_BLANK) {
+			if (*blank == MI_DRM_BLANK_UNBLANK) {
 				NVT_LOG("event=%lu, *blank=%d\n", event, *blank);
 #if WAKEUP_GESTURE
 				if (ts->gesture_enabled) {
