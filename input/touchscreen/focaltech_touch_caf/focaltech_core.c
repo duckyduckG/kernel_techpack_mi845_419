@@ -635,7 +635,7 @@ static int fts_read_parse_touchdata(struct fts_ts_data *data)
 	}
 
 	if (data->point_num > max_touch_num) {
-		FTS_INFO("invalid point_num(%d)", data->point_num);
+		/* FTS_INFO("invalid point_num(%d)", data->point_num); */
 		return -EIO;
 	}
 
