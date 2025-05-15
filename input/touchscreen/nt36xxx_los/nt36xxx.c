@@ -61,7 +61,6 @@ extern void Boot_Update_Firmware(struct work_struct *work);
 #endif
 
 #if defined(CONFIG_DRM_PANEL)
-static struct drm_panel *active_panel;
 extern void dsi_panel_doubleclick_enable(bool on);
 static int nvt_drm_notifier_callback(struct notifier_block *self, unsigned long event, void *data);
 #endif
@@ -1663,79 +1662,6 @@ err_pinctrl_get:
 	return retval;
 }
 
-#if defined(CONFIG_DRM_PANEL)
-static int nvt_ts_check_dt(struct device_node *np)
-{
-	int i;
-	int count;
-	struct device_node *node;
-	struct drm_panel *panel;
-
-	count = of_count_phandle_with_args(np, "panel", NULL);
-	if (count <= 0)
-		return 0;
-
-	for (i = 0; i < count; i++) {
-		node = of_parse_phandle(np, "panel", i);
-		panel = of_drm_find_panel(node);
-		of_node_put(node);
-		if (!IS_ERR(panel)) {
-			active_panel = panel;
-			NVT_LOG(" %s:find\n", __func__);
-			return 0;
-		}
-	}
-
-	NVT_ERR(" %s: not find\n", __func__);
-	return -ENODEV;
-}
-
-static int nvt_ts_check_default_tp(struct device_node *dt, const char *prop)
-{
-	const char **active_tp = NULL;
-	int count, tmp, score = 0;
-	const char *active;
-	int ret, i;
-
-	count = of_property_count_strings(dt->parent, prop);
-	if (count <= 0 || count > 3)
-		return -ENODEV;
-
-	active_tp = kcalloc(count, sizeof(char *),  GFP_KERNEL);
-	if (!active_tp) {
-		NVT_ERR("FTS alloc failed\n");
-		return -ENOMEM;
-	}
-
-	ret = of_property_read_string_array(dt->parent, prop,
-			active_tp, count);
-	if (ret < 0) {
-		NVT_ERR("fail to read %s %d\n", prop, ret);
-		ret = -ENODEV;
-		goto out;
-	}
-
-	for (i = 0; i < count; i++) {
-		active = active_tp[i];
-		if (active != NULL) {
-			tmp = of_device_is_compatible(dt, active);
-			if (tmp > 0)
-				score++;
-		}
-	}
-
-	if (score <= 0) {
-		NVT_ERR("not match this driver\n");
-		ret = -ENODEV;
-		goto out;
-	}
-	ret = 0;
-out:
-	kfree(active_tp);
-	return ret;
-}
-#endif
-
 /*******************************************************
 Description:
 	Novatek touchscreen driver probe function.
@@ -1749,22 +1675,8 @@ static int32_t nvt_ts_probe(struct i2c_client *client, const struct i2c_device_i
 #if ((TOUCH_KEY_NUM > 0) || WAKEUP_GESTURE)
 	int32_t retry = 0;
 #endif
-#if defined(CONFIG_DRM_PANEL)
-	struct device_node *dp = client->dev.of_node;
-#endif
 
 	NVT_LOG("start\n");
-	
-#if defined(CONFIG_DRM_PANEL)
-	if (nvt_ts_check_dt(dp)) {
-		if (!nvt_ts_check_default_tp(dp, "qcom,i2c-touch-active"))
-			ret = -EPROBE_DEFER;
-		else
-			ret = -ENODEV;
-
-		return ret;
-	}
-#endif
 
 	ts = kzalloc(sizeof(struct nvt_ts_data), GFP_KERNEL);
 	if (ts == NULL) {
