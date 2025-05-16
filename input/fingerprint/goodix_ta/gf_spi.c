@@ -994,7 +994,7 @@ static int gf_probe(struct platform_device *pdev)
 	gf_dev->notifier = goodix_noti_block;
 	mi_drm_register_client(&gf_dev->notifier);
 #endif
-	gf_dev->irq = gf_irq_num(gf_dev);
+	gf_dev->irq = gpio_to_irq(gf_dev->irq_gpio);
 	dev_set_drvdata(dev, gf_dev);
 
 	status = sysfs_create_group(&dev->kobj, &attribute_group);
