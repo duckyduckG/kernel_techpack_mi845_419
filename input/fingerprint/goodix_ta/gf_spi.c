@@ -537,14 +537,6 @@ static inline long gf_compat_ioctl(struct file *filp, unsigned int cmd,
 }
 #endif /*CONFIG_COMPAT*/
 
-#ifndef GOODIX_DRM_INTERFACE_WA
-static inline void notification_work(struct work_struct *work)
-{
-	pr_debug("%s unblank\n", __func__);
-	dsi_bridge_interface_enable(FP_UNLOCK_REJECTION_TIMEOUT);
-}
-#endif
-
 static __always_inline irqreturn_t gf_irq(int irq, void *handle)
 {
 	struct gf_dev *gf_dev = &gf;
@@ -564,7 +556,6 @@ static __always_inline irqreturn_t gf_irq(int irq, void *handle)
 		input_report_key(gf_dev->input, key_input, 0);
 		input_sync(gf_dev->input);*/
 		gf_dev->wait_finger_down = false;
-		schedule_work(&gf_dev->work);
 	}
 
 #elif defined(GF_FASYNC)
@@ -892,9 +883,6 @@ static inline int gf_probe(struct platform_device *pdev)
 	gf_dev->device_available = 0;
 	gf_dev->fb_black = 0;
 	gf_dev->wait_finger_down = false;
-#ifndef GOODIX_DRM_INTERFACE_WA
-	INIT_WORK(&gf_dev->work, notification_work);
-#endif
 
 	if (gf_parse_dts(gf_dev)) {
 		goto error_hw;
