@@ -340,9 +340,7 @@ static inline void gf_kernel_key_input(struct gf_dev *gf_dev, struct gf_key *gf_
 {
 	uint32_t key_input = 0;
 
-	if (GF_KEY_HOME == gf_key->key) {
-		key_input = GF_KEY_INPUT_HOME;
-	} else if (GF_KEY_POWER == gf_key->key) {
+	if (GF_KEY_POWER == gf_key->key) {
 		key_input = GF_KEY_INPUT_POWER;
 	} else if (GF_KEY_CAMERA == gf_key->key) {
 		key_input = GF_KEY_INPUT_CAMERA;
@@ -360,27 +358,6 @@ static inline void gf_kernel_key_input(struct gf_dev *gf_dev, struct gf_key *gf_
 		input_sync(gf_dev->input);
 		input_report_key(gf_dev->input, key_input, 0);
 		input_sync(gf_dev->input);
-	}
-	if (GF_KEY_HOME == gf_key->key) {
-		pr_debug("%s GF_KEY_HOME_enter\n", __func__);
-		if ((gf_dev->key_flag == 1) && (gf_key->value == 1)) {
-			pr_debug("%s add up\n", __func__);
-			input_report_key(gf_dev->input, key_input, 0);
-			input_sync(gf_dev->input);
-			input_report_key(gf_dev->input, key_input,
-					 gf_key->value);
-			input_sync(gf_dev->input);
-		} else {
-			input_report_key(gf_dev->input, key_input,
-					 gf_key->value);
-			input_sync(gf_dev->input);
-		}
-
-		if (gf_key->value == 1) {
-			gf_dev->key_flag = 1;
-		} else if (gf_key->value == 0) {
-			gf_dev->key_flag = 0;
-		}
 	}
 }
 
