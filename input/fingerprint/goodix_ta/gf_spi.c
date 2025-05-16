@@ -102,7 +102,7 @@ struct gf_key_map maps[] = {
 #endif
 };
 
-static void gf_enable_irq(struct gf_dev *gf_dev)
+static inline void gf_enable_irq(struct gf_dev *gf_dev)
 {
 	if (gf_dev->irq_enabled) {
 		pr_warn("IRQ has been enabled.\n");
@@ -112,7 +112,7 @@ static void gf_enable_irq(struct gf_dev *gf_dev)
 	}
 }
 
-static void gf_disable_irq(struct gf_dev *gf_dev)
+static inline void gf_disable_irq(struct gf_dev *gf_dev)
 {
 	if (gf_dev->irq_enabled) {
 		gf_dev->irq_enabled = 0;
@@ -123,7 +123,7 @@ static void gf_disable_irq(struct gf_dev *gf_dev)
 }
 
 #ifdef AP_CONTROL_CLK
-static long spi_clk_max_rate(struct clk *clk, unsigned long rate)
+static inline long spi_clk_max_rate(struct clk *clk, unsigned long rate)
 {
 	long lowest_available, nearest_low, step_size, cur;
 	long step_direction = -1;
@@ -167,7 +167,7 @@ static long spi_clk_max_rate(struct clk *clk, unsigned long rate)
 	return nearest_low;
 }
 
-static void spi_clock_set(struct gf_dev *gf_dev, int speed)
+static inline void spi_clock_set(struct gf_dev *gf_dev, int speed)
 {
 	long rate;
 	int rc;
@@ -182,7 +182,7 @@ static void spi_clock_set(struct gf_dev *gf_dev, int speed)
 	rc = clk_set_rate(gf_dev->core_clk, rate);
 }
 
-static int gfspi_ioctl_clk_init(struct gf_dev *data)
+static inline int gfspi_ioctl_clk_init(struct gf_dev *data)
 {
 	pr_debug("%s: enter\n", __func__);
 	data->clk_enabled = 0;
@@ -205,7 +205,7 @@ static int gfspi_ioctl_clk_init(struct gf_dev *data)
 	return 0;
 }
 
-static int gfspi_ioctl_clk_enable(struct gf_dev *data)
+static inline int gfspi_ioctl_clk_enable(struct gf_dev *data)
 {
 	int err;
 	pr_debug("%s: enter\n", __func__);
@@ -233,7 +233,7 @@ static int gfspi_ioctl_clk_enable(struct gf_dev *data)
 	return 0;
 }
 
-static int gfspi_ioctl_clk_disable(struct gf_dev *data)
+static inline int gfspi_ioctl_clk_disable(struct gf_dev *data)
 {
 	pr_debug("%s: enter\n", __func__);
 
@@ -269,7 +269,7 @@ static int gfspi_ioctl_clk_uninit(struct gf_dev *data)
 }
 #endif
 
-static void nav_event_input(struct gf_dev *gf_dev, gf_nav_event_t nav_event)
+static inline void nav_event_input(struct gf_dev *gf_dev, gf_nav_event_t nav_event)
 {
 	uint32_t nav_input = 0;
 
@@ -336,7 +336,7 @@ static void nav_event_input(struct gf_dev *gf_dev, gf_nav_event_t nav_event)
 	}
 }
 
-static void gf_kernel_key_input(struct gf_dev *gf_dev, struct gf_key *gf_key)
+static inline void gf_kernel_key_input(struct gf_dev *gf_dev, struct gf_key *gf_key)
 {
 	uint32_t key_input = 0;
 
@@ -384,7 +384,7 @@ static void gf_kernel_key_input(struct gf_dev *gf_dev, struct gf_key *gf_key)
 	}
 }
 
-static long gf_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static inline long gf_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	struct gf_dev *gf_dev = &gf;
 	struct gf_key gf_key;
@@ -553,7 +553,7 @@ static long gf_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 }
 
 #ifdef CONFIG_COMPAT
-static long gf_compat_ioctl(struct file *filp, unsigned int cmd,
+static inline long gf_compat_ioctl(struct file *filp, unsigned int cmd,
 			    unsigned long arg)
 {
 	return gf_ioctl(filp, cmd, (unsigned long)compat_ptr(arg));
@@ -561,14 +561,14 @@ static long gf_compat_ioctl(struct file *filp, unsigned int cmd,
 #endif /*CONFIG_COMPAT*/
 
 #ifndef GOODIX_DRM_INTERFACE_WA
-static void notification_work(struct work_struct *work)
+static inline void notification_work(struct work_struct *work)
 {
 	pr_debug("%s unblank\n", __func__);
 	dsi_bridge_interface_enable(FP_UNLOCK_REJECTION_TIMEOUT);
 }
 #endif
 
-static irqreturn_t gf_irq(int irq, void *handle)
+static __always_inline irqreturn_t gf_irq(int irq, void *handle)
 {
 	struct gf_dev *gf_dev = &gf;
 #if defined(GF_NETLINK_ENABLE)
@@ -601,7 +601,7 @@ static irqreturn_t gf_irq(int irq, void *handle)
 	return IRQ_HANDLED;
 }
 
-static int gf_open(struct inode *inode, struct file *filp)
+static inline int gf_open(struct inode *inode, struct file *filp)
 {
 	struct gf_dev *gf_dev;
 	int status = -ENXIO;
@@ -717,7 +717,7 @@ open_error1:
 }
 
 #ifdef GF_FASYNC
-static int gf_fasync(int fd, struct file *filp, int mode)
+static inline int gf_fasync(int fd, struct file *filp, int mode)
 {
 	struct gf_dev *gf_dev = filp->private_data;
 	int ret;
@@ -727,7 +727,7 @@ static int gf_fasync(int fd, struct file *filp, int mode)
 }
 #endif
 
-static int gf_release(struct inode *inode, struct file *filp)
+static inline int gf_release(struct inode *inode, struct file *filp)
 {
 	struct gf_dev *gf_dev;
 	int status = 0;
@@ -787,7 +787,7 @@ static const struct file_operations gf_fops = {
 };
 
 #ifndef GOODIX_DRM_INTERFACE_WA
-static int goodix_fb_state_chg_callback(struct notifier_block *nb,
+static __always_inline int goodix_fb_state_chg_callback(struct notifier_block *nb,
 					unsigned long val, void *data)
 {
 	struct gf_dev *gf_dev;
@@ -858,7 +858,7 @@ static struct notifier_block goodix_noti_block = {
 };
 #endif
 
-static ssize_t proximity_state_set(struct device *dev,
+static inline ssize_t proximity_state_set(struct device *dev,
 	struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct gf_dev *gf_dev = dev_get_drvdata(dev);
@@ -892,9 +892,9 @@ static const struct attribute_group attribute_group = {
 
 static struct class *gf_class;
 #if defined(USE_SPI_BUS)
-static int gf_probe(struct spi_device *spi)
+static inline int gf_probe(struct spi_device *spi)
 #elif defined(USE_PLATFORM_BUS)
-static int gf_probe(struct platform_device *pdev)
+static inline int gf_probe(struct platform_device *pdev)
 #endif
 {
 	struct gf_dev *gf_dev = &gf;
@@ -1035,9 +1035,9 @@ error_hw:
 }
 
 #if defined(USE_SPI_BUS)
-static int gf_remove(struct spi_device *spi)
+static inline int gf_remove(struct spi_device *spi)
 #elif defined(USE_PLATFORM_BUS)
-static int gf_remove(struct platform_device *pdev)
+static inline int gf_remove(struct platform_device *pdev)
 #endif
 {
 	struct gf_dev *gf_dev = &gf;
@@ -1089,7 +1089,7 @@ static struct platform_driver gf_driver = {
 	.remove = gf_remove,
 };
 
-static int __init gf_init(void)
+static inline int __init gf_init(void)
 {
 	int status;
 	/* Claim our 256 reserved device numbers.  Then register a class
@@ -1133,7 +1133,7 @@ static int __init gf_init(void)
 }
 module_init(gf_init);
 
-static void __exit gf_exit(void)
+static inline void __exit gf_exit(void)
 {
 #ifdef GF_NETLINK_ENABLE
 	netlink_exit();
