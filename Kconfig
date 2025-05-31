@@ -2,4 +2,5 @@ if MACH_XIAOMI_SDM845
 source "techpack/mi845/input/Kconfig"
 source "techpack/mi845/amplifier/Kconfig"
 source "techpack/mi845/leds/Kconfig"
+source "techpack/mi845/gps/Kconfig"
 endif # MACH_XIAOMI_SDM845
