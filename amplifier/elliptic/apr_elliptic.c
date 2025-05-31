@@ -8,7 +8,7 @@
 #include <sound/asound.h>
 #include <sound/soc.h>
 #include <sound/control.h>
-#include "msm-pcm-routing-v2.h"
+#include "../../../audio/asoc/msm-pcm-routing-v2.h"
 #include <dsp/q6audio-v2.h>
 #include <dsp/apr_audio-v2.h>
 #include <dsp/apr_elliptic.h>
@@ -18,6 +18,8 @@
 #ifndef min
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
+// elliptic < FIXME
+afe_ultrasound_state_t elus_afe;
 
 enum {
 	HALL_SLIDER_UP = 4,
@@ -127,6 +129,7 @@ int32_t ultrasound_apr_set_parameter(int32_t port_id, uint32_t param_id,
 
 	return ret;
 }
+EXPORT_SYMBOL(ultrasound_apr_set_parameter);
 
 static int32_t process_version_msg(uint32_t *payload, uint32_t payload_size)
 {
