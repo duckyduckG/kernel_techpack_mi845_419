@@ -17,4 +17,6 @@ config MFD_SPK_ID
 	tristate "Speaker ID platform driver"
 	depends on I2C
 
+source "techpack/mi845/amplifier/elliptic/Kconfig"
+
 endmenu

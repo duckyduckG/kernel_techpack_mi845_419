@@ -1,0 +1,8 @@
+#
+# ELLIPTIC driver configuration
+#
+
+config SND_ELLIPTIC
+	tristate "Providing Interface to UPS data"
+	depends on I2C
+
