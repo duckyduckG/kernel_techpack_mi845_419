@@ -3,4 +3,5 @@ source "techpack/mi845/input/Kconfig"
 source "techpack/mi845/amplifier/Kconfig"
 source "techpack/mi845/leds/Kconfig"
 source "techpack/mi845/gps/Kconfig"
+source "techpack/mi845/halls/Kconfig"
 endif # MACH_XIAOMI_SDM845
