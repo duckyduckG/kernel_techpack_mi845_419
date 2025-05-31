@@ -13,4 +13,8 @@ config SND_SOC_TAS2557
 	tristate "Texas Instruments TAS2557 speaker amplifier"
 	depends on I2C
 
+config MFD_SPK_ID
+	tristate "Speaker ID platform driver"
+	depends on I2C
+
 endmenu
