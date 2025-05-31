@@ -21,8 +21,7 @@
 #include <linux/gpio.h>
 #include <linux/of_gpio.h>
 #include <linux/delay.h>
-#include <linux/mfd/spk-id.h>
-
+#include <spk-id.h>
 
 struct spk_id_info {
 	struct pinctrl *pinctrl;
