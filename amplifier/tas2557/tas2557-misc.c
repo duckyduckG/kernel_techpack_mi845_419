@@ -45,7 +45,7 @@
 #include "tas2557-core.h"
 #include "tas2557-misc.h"
 #include <linux/dma-mapping.h>
-#include <linux/mfd/spk-id.h>
+#include <../mfd/spk-id.h>
 
 static int g_logEnable = 1;
 static struct tas2557_priv *g_tas2557;

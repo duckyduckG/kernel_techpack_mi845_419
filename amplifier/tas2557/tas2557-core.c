@@ -43,7 +43,7 @@
 
 #include "tas2557.h"
 #include "tas2557-core.h"
-#include <linux/mfd/spk-id.h>
+#include <../mfd/spk-id.h>
 #define	PPC_DRIVER_CRCCHK			0x00000200
 #define	PPC_DRIVER_CONFDEV			0x00000300
 #define	PPC_DRIVER_MTPLLSRC			0x00000400

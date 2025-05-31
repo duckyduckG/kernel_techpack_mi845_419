@@ -48,7 +48,7 @@
 
 #include "tas2557-core.h"
 #include "tas2557-codec.h"
-#include <linux/mfd/spk-id.h>
+#include <../mfd/spk-id.h>
 
 #define KCONTROL_CODEC
 
