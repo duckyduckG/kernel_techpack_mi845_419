@@ -3,3 +3,4 @@ obj-$(CONFIG_TOUCHSCREEN_FTS_MI) += focaltech_touch_mi/
 obj-$(CONFIG_TOUCHSCREEN_NT36XXX_MI845) += nt36xxx_los/
 obj-$(CONFIG_INPUT_PRESS_NDT) += ndt/
 obj-$(CONFIG_TOUCHSCREEN_ATMEL_MXT_MI) += atmel_mxt_ts/
+obj-$(CONFIG_TOUCHSCREEN_ST_FTS_V521) += fts_521/
