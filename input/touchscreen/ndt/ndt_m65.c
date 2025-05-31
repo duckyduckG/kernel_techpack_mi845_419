@@ -18,7 +18,7 @@
 #include "./fts/fts.h"
 #endif
 #ifdef CONFIG_TOUCHSCREEN_ST_FTS_V521
-#include "./fts_521/fts.h"
+#include "../fts_521/fts.h"
 #endif
 #define IIC_EEPROM 0
 #define IIC_DEV_ID 0x02
