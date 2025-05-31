@@ -1,0 +1,5 @@
+config TOUCHSCREEN_ATMEL_MXT_MI
+	bool "Atmel maXTouch Touchscreen driver"
+	depends on I2C
+	help
+	  Say Y here if you have a press ic ndt.
