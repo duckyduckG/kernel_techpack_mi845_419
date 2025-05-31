@@ -14,7 +14,7 @@ IO_MODULE := msm
 obj-$(CONFIG_SND_ELLIPTIC) += elliptic_core.o
 
 elliptic_core-objs := \
-    apr_elliptic.c \
+    apr_elliptic.o \
     elliptic.o \
     elliptic_mixer_controls.o \
     elliptic_sysfs.o \
