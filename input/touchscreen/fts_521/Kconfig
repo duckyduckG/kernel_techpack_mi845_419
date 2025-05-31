@@ -23,3 +23,7 @@ config I2C_BY_DMA
 config SECURE_TOUCH
 	bool "Secure Touch support for ST FTS V521 Touchscreen"
 	depends on TOUCHSCREEN_ST_FTS_V521
+
+config LPM_DISABLE
+	bool "Support to disable LPM Mode on touch Input"
+	depends on TOUCHSCREEN_ST_FTS_V521
