@@ -17,5 +17,5 @@ config TOUCHSCREEN_EDT_FT5X06_MAINLINE
 
 source "techpack/mi845/input/touchscreen/focaltech_touch_mi/Kconfig"
 source "techpack/mi845/input/touchscreen/nt36xxx_los/Kconfig"
-
+source "techpack/mi845/input/touchscreen/ndt/Kconfig"
 endmenu

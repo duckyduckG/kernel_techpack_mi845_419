@@ -1,0 +1,17 @@
+config INPUT_PRESS_NDT
+	bool "ndt"
+	depends on I2C
+	help
+	  Say Y here if you have a press ic ndt.
+
+config INPUT_PRESS_NDT_F60
+	bool "Ndt F60 Press Driver"
+	depends on INPUT_PRESS_NDT
+	help
+	  Say Y here if you have a press ic ndt.
+
+config INPUT_PRESS_NDT_M65
+	bool "Ndt M65 Press Driver"
+	depends on INPUT_PRESS_NDT
+	help
+	  Say Y here if you have a press ic ndt.
