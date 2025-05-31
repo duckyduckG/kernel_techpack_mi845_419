@@ -105,7 +105,9 @@ struct gf_ioc_chip_info {
 #define USE_PLATFORM_BUS 1
 /*#define  USE_SPI_BUS  1*/
 /*#define GF_FASYNC   1*/ /*If support fasync mechanism.*/
+#ifndef CONFIG_MACH_XIAOMI_E1N
 #define CONFIG_FINGERPRINT_FP_VREG_CONTROL
+#endif
 #ifndef CONFIG_FINGERPRINT_FP_VREG_CONTROL
 #define GF_PW_CTL 1
 #endif
