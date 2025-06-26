@@ -2277,11 +2277,12 @@ static int nvt_drm_notifier_callback(struct notifier_block *self, unsigned long 
 	struct nvt_ts_data *ts =
 		container_of(self, struct nvt_ts_data, notifier);
 
-	if (!evdata)
+	if (!evdata || !evdata->data || !ts)
 		return 0;
 
+	blank = evdata->data;
+
 	if (evdata->data && ts) {
-		blank = evdata->data;
 		if (event == MI_DRM_EARLY_EVENT_BLANK) {
 			if (*blank == MI_DRM_BLANK_POWERDOWN) {
 				NVT_LOG("event=%lu, *blank=%d\n", event, *blank);
