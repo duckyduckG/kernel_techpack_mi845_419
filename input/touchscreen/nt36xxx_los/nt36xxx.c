@@ -2282,29 +2282,27 @@ static int nvt_drm_notifier_callback(struct notifier_block *self, unsigned long 
 
 	blank = evdata->data;
 
-	if (evdata->data && ts) {
-		if (event == MI_DRM_EARLY_EVENT_BLANK) {
-			if (*blank == MI_DRM_BLANK_POWERDOWN) {
-				NVT_LOG("event=%lu, *blank=%d\n", event, *blank);
+	if (event == MI_DRM_EARLY_EVENT_BLANK) {
+		if (*blank == MI_DRM_BLANK_POWERDOWN) {
+			NVT_LOG("event=%lu, *blank=%d\n", event, *blank);
 #if WAKEUP_GESTURE
-				if (ts->gesture_enabled) {
-					nvt_enable_reg(ts, true);
-					dsi_panel_doubleclick_enable(true);
-				}
-#endif
-				nvt_ts_suspend(&ts->client->dev);
+			if (ts->gesture_enabled) {
+				nvt_enable_reg(ts, true);
+				dsi_panel_doubleclick_enable(true);
 			}
-		} else if (event == MI_DRM_EVENT_BLANK) {
-			if (*blank == MI_DRM_BLANK_UNBLANK) {
-				NVT_LOG("event=%lu, *blank=%d\n", event, *blank);
+#endif
+			nvt_ts_suspend(&ts->client->dev);
+		}
+	} else if (event == MI_DRM_EVENT_BLANK) {
+		if (*blank == MI_DRM_BLANK_UNBLANK) {
+			NVT_LOG("event=%lu, *blank=%d\n", event, *blank);
 #if WAKEUP_GESTURE
-				if (ts->gesture_enabled) {
-					dsi_panel_doubleclick_enable(false);
-					nvt_enable_reg(ts, false);
-				}
-#endif
-				nvt_ts_resume(&ts->client->dev);
+			if (ts->gesture_enabled) {
+				dsi_panel_doubleclick_enable(false);
+				nvt_enable_reg(ts, false);
 			}
+#endif
+			nvt_ts_resume(&ts->client->dev);
 		}
 	}
 
