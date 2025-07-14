@@ -1,3 +1,5 @@
 menu "Qualcomm Technologies, Inc. Charger and Fuel Gauge support"
 
+source "techpack/mi845/power/idtp9220/Kconfig"
+
 endmenu
