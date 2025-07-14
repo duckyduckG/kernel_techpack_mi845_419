@@ -61,7 +61,7 @@
 #include <drm/drm_notifier.h>
 #include <drm/drm_panel.h>
 #ifdef CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE
-#include <../xiaomi/xiaomi_touch.h>
+#include <../xiaomi_touch/xiaomi_touch.h>
 #endif
 
 #define INPUT_PHYS_NAME "synaptics_dsx/touch_input"
