@@ -1,5 +1,5 @@
+obj-$(CONFIG_MFD_SPK_ID) += mfd/
 obj-$(CONFIG_SND_SOC_TAS2559_MAINLINE) += tas2559_mainline.o
 obj-$(CONFIG_SND_SOC_TAS2559) += tas2559/
 obj-$(CONFIG_SND_SOC_TAS2557) += tas2557/
-obj-$(CONFIG_MFD_SPK_ID) += mfd/
 obj-$(CONFIG_SND_ELLIPTIC) += elliptic/
