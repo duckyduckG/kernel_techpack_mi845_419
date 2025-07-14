@@ -15,7 +15,7 @@
 #include <ft5x46_ts.h>
 #include "ft8716_pramboot.h"
 #ifdef CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE
-#include <../xiaomi/xiaomi_touch.h>
+#include <../xiaomi_touch/xiaomi_touch.h>
 #endif
 
 /* #define FT5X46_DEBUG_PERMISSION */
