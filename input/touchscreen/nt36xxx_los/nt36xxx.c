@@ -66,6 +66,7 @@ extern void Boot_Update_Firmware(struct work_struct *work);
 #endif
 
 #if defined(CONFIG_DRM_PANEL)
+extern void drm_panel_reset_skip_enable(bool enable);
 static int nvt_drm_notifier_callback(struct notifier_block *self, unsigned long event, void *data);
 #endif
 
