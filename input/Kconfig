@@ -1,2 +1,8 @@
+menu "Input device support"
+	depends on !UML
+
 source "techpack/mi845/input/fingerprint/Kconfig"
+
+endmenu
+
 source "techpack/mi845/input/touchscreen/Kconfig"
