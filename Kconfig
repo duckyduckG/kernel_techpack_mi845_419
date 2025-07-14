@@ -5,4 +5,5 @@ source "techpack/mi845/halls/Kconfig"
 source "techpack/mi845/input/Kconfig"
 source "techpack/mi845/leds/Kconfig"
 source "techpack/mi845/power/Kconfig"
+source "techpack/mi845/regulator/Kconfig"
 endif # MACH_XIAOMI_SDM845

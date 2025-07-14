@@ -5,6 +5,7 @@ obj-$(CONFIG_HALLS)    += halls/
 obj-$(CONFIG_INPUT) += input/
 obj-$(CONFIG_NEW_LEDS) += leds/
 obj-$(CONFIG_POWER_SUPPLY) += power/
+obj-$(CONFIG_REGULATOR) += regulator/
 else
 ccflags-y := -Wno-unused-function
 obj-y := stub.o
