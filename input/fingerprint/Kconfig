@@ -19,6 +19,7 @@ if INPUT_FINGERPRINT
 
 source "techpack/mi845/input/fingerprint/goodix_ta/Kconfig"
 source "techpack/mi845/input/fingerprint/fpc_tee/Kconfig"
+source "techpack/mi845/input/fingerprint/synaptics/Kconfig"
 
 endif
 
