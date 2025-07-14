@@ -21,6 +21,7 @@ source "techpack/mi845/input/touchscreen/nt36xxx_los/Kconfig"
 source "techpack/mi845/input/touchscreen/ndt/Kconfig"
 source "techpack/mi845/input/touchscreen/atmel_mxt_ts/Kconfig"
 source "techpack/mi845/input/touchscreen/fts_521/Kconfig"
+source "techpack/mi845/input/touchscreen/synaptics_dsx_force/Kconfig"
 source "techpack/mi845/input/touchscreen/xiaomi_touch/Kconfig"
 
 endmenu
