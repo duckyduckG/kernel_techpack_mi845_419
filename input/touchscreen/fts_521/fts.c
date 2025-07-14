@@ -85,7 +85,7 @@
 #include "../ndt/ndt_core.h"
 #endif
 #ifdef CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE
-#include "../../../../../drivers/input/touchscreen/xiaomi/xiaomi_touch.h"
+#include "../xiaomi_touch/xiaomi_touch.h"
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_COMMON
