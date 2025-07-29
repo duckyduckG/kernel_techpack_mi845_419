@@ -1,6 +1,9 @@
 menu "Touchscreen"
 	depends on INPUT_TOUCHSCREEN
 
+source "techpack/mi845/input/touchscreen/nt36xxx_los/Kconfig"
+source "techpack/mi845/input/touchscreen/focaltech_touch_mi/Kconfig"
+
 config TOUCHSCREEN_EDT_FT5X06_MAINLINE
 	tristate "EDT FocalTech FT5x06 I2C Touchscreen support"
 	depends on I2C
@@ -14,8 +17,4 @@ config TOUCHSCREEN_EDT_FT5X06_MAINLINE
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called edt-ft5x06.
-
-source "techpack/mi845/input/touchscreen/focaltech_touch_mi/Kconfig"
-source "techpack/mi845/input/touchscreen/nt36xxx_los/Kconfig"
-
 endmenu
