@@ -1,6 +1,15 @@
 menu "Touchscreen"
 	depends on INPUT_TOUCHSCREEN
 
+source "techpack/mi845/input/touchscreen/synaptics_dsx_force/Kconfig"
+source "techpack/mi845/input/touchscreen/fts_521/Kconfig"
+source "techpack/mi845/input/touchscreen/nt36xxx_los/Kconfig"
+source "techpack/mi845/input/touchscreen/ft5x46/Kconfig"
+source "techpack/mi845/input/touchscreen/focaltech_touch_mi/Kconfig"
+source "techpack/mi845/input/touchscreen/atmel_mxt_ts/Kconfig"
+source "techpack/mi845/input/touchscreen/ndt/Kconfig"
+source "techpack/mi845/input/touchscreen/xiaomi_touch/Kconfig"
+
 config TOUCHSCREEN_EDT_FT5X06_MAINLINE
 	tristate "EDT FocalTech FT5x06 I2C Touchscreen support"
 	depends on I2C
@@ -14,14 +23,4 @@ config TOUCHSCREEN_EDT_FT5X06_MAINLINE
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called edt-ft5x06.
-
-source "techpack/mi845/input/touchscreen/focaltech_touch_mi/Kconfig"
-source "techpack/mi845/input/touchscreen/ft5x46/Kconfig"
-source "techpack/mi845/input/touchscreen/nt36xxx_los/Kconfig"
-source "techpack/mi845/input/touchscreen/ndt/Kconfig"
-source "techpack/mi845/input/touchscreen/atmel_mxt_ts/Kconfig"
-source "techpack/mi845/input/touchscreen/fts_521/Kconfig"
-source "techpack/mi845/input/touchscreen/synaptics_dsx_force/Kconfig"
-source "techpack/mi845/input/touchscreen/xiaomi_touch/Kconfig"
-
 endmenu
