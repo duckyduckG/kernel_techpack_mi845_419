@@ -66,6 +66,7 @@ extern void Boot_Update_Firmware(struct work_struct *work);
 #endif
 
 #if defined(CONFIG_DRM_PANEL)
+extern void dsi_panel_doubleclick_enable(bool on);
 static int nvt_drm_notifier_callback(struct notifier_block *self, unsigned long event, void *data);
 #endif
 
@@ -2287,7 +2288,7 @@ static int nvt_drm_notifier_callback(struct notifier_block *self, unsigned long 
 #if WAKEUP_GESTURE
 			if (ts->gesture_enabled) {
 				nvt_enable_reg(ts, true);
-				drm_panel_reset_skip_enable(true);
+				dsi_panel_doubleclick_enable(true);
 			}
 #endif
 			nvt_ts_suspend(&ts->client->dev);
@@ -2297,7 +2298,7 @@ static int nvt_drm_notifier_callback(struct notifier_block *self, unsigned long 
 			NVT_LOG("event=%lu, *blank=%d\n", event, *blank);
 #if WAKEUP_GESTURE
 			if (ts->gesture_enabled) {
-				drm_panel_reset_skip_enable(false);
+				dsi_panel_doubleclick_enable(false);
 				nvt_enable_reg(ts, false);
 			}
 #endif
