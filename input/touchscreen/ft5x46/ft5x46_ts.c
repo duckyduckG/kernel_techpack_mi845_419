@@ -225,7 +225,14 @@ static int ft5x46_recv_byte(struct ft5x46_data *ft5x46, int len, ...)
 {
 	int error = 0;
 	va_list varg;
-	u8 i, buf[len];
+	u8 i;
+	u8 *buf = NULL;
+
+	buf = (u8 *)kzalloc(sizeof(u8) * len, GFP_KERNEL);
+	if (!buf) {
+		res = -ENOMEM;
+		goto END;
+	}
 
 	error = ft5x46->bops->recv(ft5x46->dev, buf, len);
 	if (error)
@@ -236,7 +243,12 @@ static int ft5x46_recv_byte(struct ft5x46_data *ft5x46, int len, ...)
 		*va_arg(varg, u8 *) = buf[i];
 	va_end(varg);
 
-	return 0;
+END:
+	if (buf)
+		kfree(buf);
+	buf = NULL;
+
+	return len;
 }
 
 static int ft5x46_send_block(struct ft5x46_data *ft5x46,
@@ -254,12 +266,24 @@ static int ft5x46_recv_block(struct ft5x46_data *ft5x46,
 static int ft5x46_send_byte(struct ft5x46_data *ft5x46, int len, ...)
 {
 	va_list varg;
-	u8 i, buf[len];
+	u8 i;
+	u8 *buf = NULL;
+
+	buf = (u8 *)kzalloc(sizeof(u8) * len, GFP_KERNEL);
+	if (!buf) {
+		res = -ENOMEM;
+		goto END;
+	}
 
 	va_start(varg, len);
 	for (i = 0; i < len; i++)
 		buf[i] = va_arg(varg, int); /* u8 promote to int */
 	va_end(varg);
+
+END:
+	if (buf)
+		kfree(buf);
+	buf = NULL;
 
 	return ft5x46_send_block(ft5x46, buf, len);
 }

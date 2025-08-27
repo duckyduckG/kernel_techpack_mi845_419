@@ -45,6 +45,8 @@ static void *client;
 #include "ftsIO.h"
 
 extern struct fts_ts_info *fts_info;
+static u8 *buf1;
+static u8 *buf2;
 
 /**
 * Initialize the static client variable of the fts_lib library in order to allow any i2c/spi transaction in the driver. (Must be called in the probe)
@@ -68,6 +70,14 @@ int openChannel(void *clt)
 		 ((struct spi_device *)client)->mode);
 	logError(1, "%s openChannel: completed! \n", tag);
 #endif
+
+	if (!buf1)
+		buf1 = (u8 *)kzalloc(PAGE_SIZE, GFP_ATOMIC);
+	if (!buf2)
+		buf2 = (u8 *)kzalloc(PAGE_SIZE, GFP_ATOMIC);
+	if (!buf1 || !buf2)
+		return ERROR_ALLOC;
+
 	return OK;
 }
 
@@ -599,7 +609,7 @@ int fts_writeU8UX(u8 cmd, AddrSize addrSize, u64 address, u8 *data,
 		  int dataSize)
 {
 
-	u8 finalCmd[1 + addrSize + WRITE_CHUNK];
+	u8 *finalCmd = buf1;
 	int remaining = dataSize;
 	int toWrite = 0, i = 0;
 
@@ -659,8 +669,8 @@ int fts_writeU8UX(u8 cmd, AddrSize addrSize, u64 address, u8 *data,
 int fts_writeReadU8UX(u8 cmd, AddrSize addrSize, u64 address, u8 *outBuf,
 		      int byteToRead, int hasDummyByte)
 {
-	u8 finalCmd[1 + addrSize];
-	u8 buff[READ_CHUNK + 1];
+	u8 *finalCmd = buf1;
+	u8 *buff = buf2;
 	int remaining = byteToRead;
 	int toRead = 0, i = 0;
 
@@ -723,10 +733,16 @@ int fts_writeU8UXthenWriteU8UX(u8 cmd1, AddrSize addrSize1, u8 cmd2,
 			       AddrSize addrSize2, u64 address, u8 *data,
 			       int dataSize)
 {
-	u8 finalCmd1[1 + addrSize1];
-	u8 finalCmd2[1 + addrSize2 + WRITE_CHUNK];
+	u8 *finalCmd1 = NULL;
+	u8 *finalCmd2 = buf1;
 	int remaining = dataSize;
-	int toWrite = 0, i = 0;
+	int toWrite = 0, i = 0, ret = OK;
+
+	finalCmd1 = (u8 *)kzalloc(sizeof(u8) * 10, GFP_KERNEL);
+	if (!finalCmd1) {
+		ret = -ENOMEM;
+		goto end;
+	}
 
 	while (remaining > 0) {
 		if (remaining >= WRITE_CHUNK) {
@@ -758,6 +774,8 @@ int fts_writeU8UXthenWriteU8UX(u8 cmd1, AddrSize addrSize1, u8 cmd2,
 		if (fts_write(finalCmd1, 1 + addrSize1) < OK) {
 			logError(1, "%s %s: first write error... ERROR %08X \n",
 				 tag, __func__, ERROR_BUS_W);
+			if (finalCmd1)
+				kfree(finalCmd1);
 			return ERROR_BUS_W;
 		}
 
@@ -765,6 +783,8 @@ int fts_writeU8UXthenWriteU8UX(u8 cmd1, AddrSize addrSize1, u8 cmd2,
 			logError(1,
 				 "%s %s: second write error... ERROR %08X \n",
 				 tag, __func__, ERROR_BUS_W);
+			if (finalCmd1)
+				kfree(finalCmd1);
 			return ERROR_BUS_W;
 		}
 
@@ -773,7 +793,11 @@ int fts_writeU8UXthenWriteU8UX(u8 cmd1, AddrSize addrSize1, u8 cmd2,
 		data += toWrite;
 	}
 
-	return OK;
+end:
+	if (finalCmd1)
+		kfree(finalCmd1);
+
+	return ret;
 }
 
 /**
@@ -792,11 +816,22 @@ int fts_writeU8UXthenWriteReadU8UX(u8 cmd1, AddrSize addrSize1, u8 cmd2,
 				   AddrSize addrSize2, u64 address, u8 *outBuf,
 				   int byteToRead, int hasDummyByte)
 {
-	u8 finalCmd1[1 + addrSize1];
-	u8 finalCmd2[1 + addrSize2];
-	u8 buff[READ_CHUNK + 1];
+	u8 *finalCmd1 = NULL;
+	u8 *finalCmd2 = NULL;
+	u8 *buff = buf1;
 	int remaining = byteToRead;
-	int toRead = 0, i = 0;
+	int toRead = 0, i = 0, ret = OK;
+
+	finalCmd1 = (u8 *)kzalloc(sizeof(u8) * 10, GFP_KERNEL);
+	if (!finalCmd1) {
+		ret = -ENOMEM;
+		goto end;
+	}
+	finalCmd2 = (u8 *)kzalloc(sizeof(u8) * 10, GFP_KERNEL);
+	if (!finalCmd2) {
+		ret = -ENOMEM;
+		goto end;
+	}
 
 	while (remaining > 0) {
 		if (remaining >= READ_CHUNK) {
@@ -854,5 +889,10 @@ int fts_writeU8UXthenWriteReadU8UX(u8 cmd1, AddrSize addrSize1, u8 cmd2,
 		outBuf += toRead;
 	}
 
-	return OK;
+end:
+	if (finalCmd1)
+		kfree(finalCmd1);
+	if (finalCmd2)
+		kfree(finalCmd2);
+	return ret;
 }

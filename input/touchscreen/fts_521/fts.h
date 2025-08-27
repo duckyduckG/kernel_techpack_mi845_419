@@ -119,6 +119,8 @@
 
 #define AREA_MIN                            PRESSURE_MIN
 #define AREA_MAX                            PRESSURE_MAX
+#define TXNODE_MAX							40
+#define RXNODE_MAX							40
 /**** END ****/
 /**@}*/
 /*********************************************************/

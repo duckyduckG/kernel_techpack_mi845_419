@@ -324,7 +324,7 @@ static ssize_t fts_driver_test_write(struct file *file, const char __user *buf,
 	int numberParam = 0;
 	struct fts_ts_info *info = dev_get_drvdata(getDev());
 	char *p = NULL;
-	char pbuf[count];
+	char *pbuf = NULL;
 	char path[101] = { 0 };
 	int res = -1, j, index = 0;
 	int size = 6;
@@ -332,8 +332,8 @@ static ssize_t fts_driver_test_write(struct file *file, const char __user *buf,
 	u16 byteToRead = 0;
 	u32 fileSize = 0;
 	u8 *readData = NULL;
-	u8 cmd[count];
-	u32 funcToTest[((count + 1) / 3)];
+	u8 *cmd = NULL;
+	u32 *funcToTest = NULL;
 	u64 addr = 0;
 	MutualSenseFrame frameMS;
 	SelfSenseFrame frameSS;
@@ -354,6 +354,24 @@ static ssize_t fts_driver_test_write(struct file *file, const char __user *buf,
 	mess.dummy = 0;
 	mess.action = 0;
 	mess.msg_size = 0;
+
+	cmd = (u8 *)kzalloc(sizeof(u8) * count, GFP_KERNEL);
+	if (!cmd) {
+		res = -ENOMEM;
+		goto END;
+	}
+
+	pbuf = (u8 *)kzalloc(sizeof(u8) * count, GFP_KERNEL);
+	if (!pbuf) {
+		res = -ENOMEM;
+		goto END;
+	}
+
+	funcToTest = (u32 *)kzalloc(sizeof(u32) * ((count + 1) / 3), GFP_KERNEL);
+	if (!funcToTest) {
+		res = -ENOMEM;
+		goto END;
+	}
 
 	if (access_ok(VERIFY_READ, buf, count) < OK
 	    || copy_from_user(pbuf, buf, count) != 0) {
@@ -2385,6 +2403,16 @@ ERROR:
 	numberParam = 0;
 	if (readData != NULL)
 		kfree(readData);
+	if (cmd)
+		kfree(cmd);
+	if (pbuf)
+		kfree(pbuf);
+	if (funcToTest)
+		kfree(funcToTest);
+	readData = NULL;
+	cmd = NULL;
+	pbuf = NULL;
+	funcToTest = NULL;
 
 	return count;
 }
